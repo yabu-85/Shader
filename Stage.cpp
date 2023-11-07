@@ -3,7 +3,7 @@
 
 //コンストラクタ
 Stage::Stage(GameObject* parent)
-    :GameObject(parent, "Stage"), hModel_(-1), width_(15), height_(15)
+    :GameObject(parent, "Stage"), hModel_(-1)
 {
 }
 

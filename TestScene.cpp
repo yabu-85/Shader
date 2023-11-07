@@ -16,13 +16,6 @@ void TestScene::Initialize()
 
 void TestScene::Update()
 {
-	//if (Input::IsKey(DIK_SPACE))
-	//{
-	//	SceneManager* pSceneManager = (SceneManager*)FindObject("SceneManager");
-	//	pSceneManager->ChangeScene(SCENE_ID_TEST);
-	//}
-
-	//GameObject* dbTest = FindObject("SceneManager");
 }
 
 void TestScene::Draw()
