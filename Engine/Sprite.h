@@ -32,7 +32,7 @@ private:
 	virtual void InitIndexData();		//インデックス情報を準備
 	HRESULT CreateIndexBuffer();		//インデックスバッファ作成
 	HRESULT CreateConstantBuffer();		//コンスタントバッファ作成
-	HRESULT LoadTexture();				//テクスチャをロード
+	HRESULT LoadTexture(string fileName);				//テクスチャをロード
 
 	//--------------Draw関数から呼ばれる関数
 	void PassDataToCB(Transform transformmatNormal);		//コンスタントバッファに各種情報を渡す
@@ -56,7 +56,7 @@ public:
 	~Sprite();
 
 	//各情報初期化、戻り値：失敗/成功
-	HRESULT Initialize();				
+	HRESULT Initialize(string fileName);
 
 	//引数：transform	トランスフォームクラスオブジェクト
 	void Draw(Transform& transform);	

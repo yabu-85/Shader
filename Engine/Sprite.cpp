@@ -11,7 +11,7 @@ Sprite::~Sprite()
 }
 
 //初期化
-HRESULT Sprite::Initialize()
+HRESULT Sprite::Initialize(string fileName)
 {
     HRESULT hr = S_OK;
 
@@ -36,7 +36,7 @@ HRESULT Sprite::Initialize()
         return hr;
     }
 
-    hr = LoadTexture();
+    hr = LoadTexture(fileName);
     if (FAILED(hr))
     {
         MessageBox(NULL, "テクスチャの読み込みに失敗しました", "エラー", MB_OK);
@@ -53,7 +53,7 @@ void Sprite::Draw(Transform& transform)
     transform.Calclation();
     PassDataToCB(transform);
     SetBufferToPipeline();
-    Direct3D::pContext_->DrawIndexed(indexNum_, 0, 0);
+    Direct3D::pContext_->DrawIndexed((UINT)indexNum_, (UINT)0, (UINT)0);
 }
 
 //開放処理
@@ -173,12 +173,12 @@ HRESULT Sprite::CreateConstantBuffer()
 }
 
 //テクスチャをロード
-HRESULT Sprite::LoadTexture()
+HRESULT Sprite::LoadTexture(string fileName)
 {
     HRESULT hr;
     // テクスチャの読み込み
     pTexture_ = new Texture;
-    hr = pTexture_->Load("Assets\\Dice.png");
+    hr = pTexture_->Load("Assets\\" + fileName + ".png");
     if (FAILED(hr))
     {
         MessageBox(NULL, "テクスチャ読み込みに失敗しました", "エラー", MB_OK);
