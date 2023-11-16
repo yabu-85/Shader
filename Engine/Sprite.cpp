@@ -178,7 +178,7 @@ HRESULT Sprite::LoadTexture(string fileName)
     HRESULT hr;
     // テクスチャの読み込み
     pTexture_ = new Texture;
-    hr = pTexture_->Load("Assets\\" + fileName + ".png");
+    hr = pTexture_->Load("Assets\\" + fileName);
     if (FAILED(hr))
     {
         MessageBox(NULL, "テクスチャ読み込みに失敗しました", "エラー", MB_OK);

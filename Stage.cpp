@@ -21,11 +21,11 @@ Stage::~Stage()
 void Stage::Initialize()
 {
     //モデルデータのロード
-    hModel_ = Model::Load("Assets/BoxBrick.fbx");
+    hModel_ = Model::Load("Assets/numberCube.fbx");
     assert(hModel_ >= 0);
 
     img = new Sprite();
-    img->Initialize("neko");
+    img->Initialize("neko.png");
 }
 
 //更新
@@ -42,7 +42,7 @@ void Stage::Draw()
     Model::Draw(hModel_);
 
     blockTrans.scale_ = XMFLOAT3(1.5f, 1.5f, 1.5f);
-    img->Draw(blockTrans);
+    //img->Draw(blockTrans);
 }
 
 //開放
