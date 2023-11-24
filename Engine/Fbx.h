@@ -28,6 +28,7 @@ class Fbx
 	{
 		XMMATRIX	matWVP;			// ワールド行列・ビュー行列・射影行列の合成行列
 		XMMATRIX	matNormal;		// 法線行列
+		XMFLOAT4	lightDirec;		// ライトの向き
 		XMFLOAT4	diffuseColor;   // ディフューズカラー
 		int			isTextured;		// テクスチャを使用するかのフラグ
 	};
@@ -59,11 +60,11 @@ class Fbx
 	void InitConstantBuffer();
 
 	// マテリアルの初期化
-	void InitMaterial(fbxsdk::FbxNode* pNode);
+	void InitMaterial(fbxsdk::FbxNode* pNode, bool isFlatColor);
 
 public:
 	Fbx();
-	HRESULT Load(std::string fileName);		// FBXファイルの読み込み
-	void Draw(Transform& transform);		// FBXモデルの描画
-	void Release();							// メモリの解放
+	HRESULT Load(std::string fileName, bool isFlatColor);		// FBXファイルの読み込み
+	void Draw(Transform& transform);							// FBXモデルの描画
+	void Release();												// メモリの解放
 };

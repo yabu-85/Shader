@@ -13,7 +13,7 @@ namespace Model
 		std::string filename_;
 
 	};
-	int Load(std::string fileName);
+	int Load(std::string fileName, bool isFlatColor = false);
 	void SetTransform(int hModel, Transform transform);
 	void Draw(int hModel);
 	void Release();

@@ -7,7 +7,7 @@ namespace Model {
 	std::vector<ModelData*> modelList;
 }
 
-int Model::Load(std::string fileName)
+int Model::Load(std::string fileName, bool isFlatColor)
 {
 	ModelData* pData;
 	pData = new ModelData;
@@ -26,7 +26,7 @@ int Model::Load(std::string fileName)
 	if (pData->pfbx_ == nullptr)
 	{
 		pData->pfbx_ = new Fbx;
-		pData->pfbx_->Load(fileName);
+		pData->pfbx_->Load(fileName, isFlatColor);
 	}
 
 	modelList.push_back(pData);

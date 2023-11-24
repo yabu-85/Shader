@@ -11,7 +11,7 @@ Fbx::Fbx()
 {
 }
 
-HRESULT Fbx::Load(std::string fileName)
+HRESULT Fbx::Load(std::string fileName, bool isFlatColor)
 {
 	//マネージャを生成
 	FbxManager* pFbxManager = FbxManager::Create();
@@ -49,7 +49,7 @@ HRESULT Fbx::Load(std::string fileName)
 	InitVertex(mesh);		//頂点バッファ準備
 	InitIndex(mesh);		//インデックスバッファ準備
 	InitConstantBuffer();	//コンスタントバッファ準備
-	InitMaterial(pNode);
+	InitMaterial(pNode, isFlatColor);
 
 	//カレントディレクトリを元に戻す
 	SetCurrentDirectory(defaultCurrentDir);
@@ -184,7 +184,7 @@ void Fbx::InitConstantBuffer()
 }
 
 //マテリアルの準備
-void Fbx::InitMaterial(fbxsdk::FbxNode* pNode)
+void Fbx::InitMaterial(fbxsdk::FbxNode* pNode, bool isFlatColor)
 {
 	//マテリアルリスト
 	pMaterialList_ = new MATERIAL[materialCount_];
@@ -199,10 +199,9 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode)
 
 		//テクスチャの数数
 		int fileTextureCount = lProperty.GetSrcObjectCount<FbxFileTexture>();
-
+		
 		//テクスチャあり
-		if (fileTextureCount)
-		{
+		if (!isFlatColor && fileTextureCount) {
 			FbxFileTexture* textureInfo = lProperty.GetSrcObject<FbxFileTexture>(0);
 			const char* textureFilePath = textureInfo->GetRelativeFileName();
 
@@ -216,6 +215,7 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode)
 			pMaterialList_[i].pTexture = new Texture;
 			HRESULT hr = pMaterialList_[i].pTexture->Load(name);
 			assert(hr == S_OK);
+
 		}
 
 		//テクスチャ無し
@@ -236,6 +236,8 @@ void Fbx::Draw(Transform& transform)
 	Direct3D::SetShader(SHADER_3D);
 	transform.Calclation();//トランスフォームを計算
 
+	XMFLOAT4 light = XMFLOAT4(-1, 0.5, -0.7, 0);
+
 	//コンスタントバッファに情報を渡す
 	for (int i = 0; i < materialCount_; i++)
 	{
@@ -243,6 +245,7 @@ void Fbx::Draw(Transform& transform)
 		cb.matWVP = XMMatrixTranspose(transform.GetWorldMatrix() * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());
 		cb.matNormal = XMMatrixTranspose(transform.GetNormalMatrix());
 		cb.diffuseColor = pMaterialList_[i].diffuse;
+		cb.lightDirec = light;
 		cb.isTextured = pMaterialList_[i].pTexture != nullptr;
 
 		D3D11_MAPPED_SUBRESOURCE pdata;

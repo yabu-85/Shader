@@ -1,6 +1,7 @@
 #include "Engine/Model.h"
 #include "Stage.h"
 #include "Engine/Sprite.h"
+#include "Engine/Camera.h"
 
 namespace {
     Sprite* img = nullptr;
@@ -32,13 +33,16 @@ void Stage::Initialize()
     hModel[1] = Model::Load("Assets/arrow.fbx");
     assert(hModel[1] >= 0);
 
-    img = new Sprite();
-    img->Initialize("neko.png");
+    //img = new Sprite();
+    //img->Initialize("neko.png");
 }
 
 //XV
 void Stage::Update()
 {
+    Camera::SetPosition(XMFLOAT3(3.0f, 3.0f, 5.0f));
+    Camera::SetTarget(XMFLOAT3(0.0f, 0.0f, 0.0f));
+
 }
 
 //•`‰æ
@@ -64,8 +68,8 @@ void Stage::Draw()
     }
     
     blockTrans.scale_ = XMFLOAT3(1.5f, 1.5f, 1.5f);
+   
     //img->Draw(blockTrans);
-
     
 }
 
