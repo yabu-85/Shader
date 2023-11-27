@@ -50,6 +50,8 @@ void Stage::Update()
     if (Input::IsKey(DIK_D)) camPos.x -= 0.1f;
     if (Input::IsKey(DIK_W)) camPos.z -= 0.1f;
     if (Input::IsKey(DIK_S)) camPos.z += 0.1f;
+    if (Input::IsKey(DIK_E)) camPos.y += 0.1f;
+    if (Input::IsKey(DIK_Q)) camPos.y -= 0.1f;
 
     Camera::SetPosition(camPos);
 
