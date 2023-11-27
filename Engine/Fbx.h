@@ -28,7 +28,8 @@ class Fbx
 	{
 		XMMATRIX	matWVP;			// ワールド行列・ビュー行列・射影行列の合成行列
 		XMMATRIX	matNormal;		// 法線行列
-		XMFLOAT4	lightDirec;		// ライトの向き
+		XMFLOAT4	lightDirection;	// ライトの向き
+		XMFLOAT4	cameraPos;		//カメラの位置
 		XMFLOAT4	diffuseColor;   // ディフューズカラー
 		int			isTextured;		// テクスチャを使用するかのフラグ
 	};

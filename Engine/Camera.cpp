@@ -33,6 +33,13 @@ void Camera::SetPosition(XMFLOAT3 position)
 	SetPosition(XMLoadFloat3(&position));
 }
 
+XMFLOAT3 Camera::GetPosition()
+{
+	XMFLOAT3 pos{};
+	XMStoreFloat3(&pos, position_);
+	return pos;
+}
+
 //焦点を設定
 void Camera::SetTarget(XMVECTOR target)
 {
@@ -42,6 +49,11 @@ void Camera::SetTarget(XMVECTOR target)
 void Camera::SetTarget(XMFLOAT3 target)
 {
 	SetTarget(XMLoadFloat3(&target));
+}
+
+XMFLOAT3 Camera::GetTarget()
+{
+	return XMFLOAT3();
 }
 
 //ビュー行列を取得

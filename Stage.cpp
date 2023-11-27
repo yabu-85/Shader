@@ -2,11 +2,13 @@
 #include "Stage.h"
 #include "Engine/Sprite.h"
 #include "Engine/Camera.h"
+#include "Engine/Input.h"
 
 namespace {
     Sprite* img = nullptr;
 
     int hModel[2] = { -1, -1 };
+    XMFLOAT3 camPos{};
 
 }
 
@@ -35,13 +37,21 @@ void Stage::Initialize()
 
     //img = new Sprite();
     //img->Initialize("neko.png");
+
+    camPos = XMFLOAT3(0.0f, 3.0f, 5.0f);
+    Camera::SetTarget(XMFLOAT3(0.0f, 0.0f, 0.0f));
+
 }
 
 //çXêV
 void Stage::Update()
 {
-    Camera::SetPosition(XMFLOAT3(3.0f, 3.0f, 5.0f));
-    Camera::SetTarget(XMFLOAT3(0.0f, 0.0f, 0.0f));
+    if (Input::IsKey(DIK_A)) camPos.x += 0.1f;
+    if (Input::IsKey(DIK_D)) camPos.x -= 0.1f;
+    if (Input::IsKey(DIK_W)) camPos.z -= 0.1f;
+    if (Input::IsKey(DIK_S)) camPos.z += 0.1f;
+
+    Camera::SetPosition(camPos);
 
 }
 

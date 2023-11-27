@@ -12,7 +12,8 @@ cbuffer global
 {
 	float4x4	matWVP;			// ワールド・ビュー・プロジェクションの合成行列
 	float4x4	matNormal;      // ワールド行列
-	float4		ligftDirec;		// ライトの向き
+	float4		lightDirection;	// ライトの向き
+	float4		Speculer;		//
 	float4		diffuseColor;	// ディフューズカラー（マテリアルの色）
 	bool		isTexture;		// テクスチャ貼ってあるかどうか
 };
@@ -43,7 +44,7 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
 	//法線を回転
 	normal = mul(normal, matNormal);
 
-	float4 light = ligftDirec;
+	float4 light = lightDirection;
 	light = normalize(light);
 	outData.color = clamp(dot(normal, light), 0, 1);
 
@@ -71,6 +72,14 @@ float4 PS(VS_OUT inData) : SV_Target
 		diffuse = lightSource * g_texture.Sample(g_sampler, inData.uv) * inData.color;
 		ambient = lightSource * g_texture.Sample(g_sampler, inData.uv) * ambientSource;
 	}
-	return (diffuse + ambient);
-	//return g_texture.Sample(g_sampler, inData.uv);
+
+	//鏡面反射光（スペキュラー）
+	float4 speculer = float4(0, 0, 0, 0);	//とりあえずハイライトは無しにしておいて…
+	if (Speculer.a != 0)	//スペキュラーの情報があれば
+	{
+		float4 R = reflect(lightDir, inData.normal);			//正反射ベクトル
+		speculer = pow(saturate(dot(R, inData.eye)), g_shuniness) * Speculer;	//ハイライトを求める
+	}
+
+	return (diffuse + ambient + speculer);
 }

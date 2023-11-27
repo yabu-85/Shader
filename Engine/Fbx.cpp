@@ -237,6 +237,7 @@ void Fbx::Draw(Transform& transform)
 	transform.Calclation();//トランスフォームを計算
 
 	XMFLOAT4 light = XMFLOAT4(-1, 0.5, -0.7, 0);
+	XMFLOAT3 cameraPos = Camera::GetPosition();
 
 	//コンスタントバッファに情報を渡す
 	for (int i = 0; i < materialCount_; i++)
@@ -245,7 +246,8 @@ void Fbx::Draw(Transform& transform)
 		cb.matWVP = XMMatrixTranspose(transform.GetWorldMatrix() * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());
 		cb.matNormal = XMMatrixTranspose(transform.GetNormalMatrix());
 		cb.diffuseColor = pMaterialList_[i].diffuse;
-		cb.lightDirec = light;
+		cb.lightDirection = light;
+		cb.cameraPos = XMFLOAT4(cameraPos.x, cameraPos.y, cameraPos.z, 0);
 		cb.isTextured = pMaterialList_[i].pTexture != nullptr;
 
 		D3D11_MAPPED_SUBRESOURCE pdata;
