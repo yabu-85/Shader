@@ -24,9 +24,9 @@ cbuffer global
 struct VS_OUT
 {
 	float4 pos    : SV_POSITION;	//位置
-	float2 uv	  : TEXCOORD;		//uv座標
-	float4 color  : COLOR;			//色（明るさ）
+	float4 normal : TEXCOORD0;			//法線
 	float4 eye	  : TEXCOORD1;		//視線
+	float2 uv	  : TEXCOORD2;		//uv座標
 };
 
 //───────────────────────────────────────
@@ -44,10 +44,7 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
 
 	//法線を回転
 	normal = mul(normal, g_matW);
-
-	float4 light = g_lightDirection;
-	light = normalize(light);
-	outData.color = clamp(dot(normal, light), 0, 1);
+	outData.normal = normal;
 
 	//視線ベクトル（ハイライトの計算に必要
 	float4 worldPos = mul(pos, g_matW);					//ローカル座標にワールド行列をかけてワールド座標へ
@@ -65,16 +62,20 @@ float4 PS(VS_OUT inData) : SV_Target
 	float4 lightSource = float4(1.0f, 1.0f, 1.0f, 1.0f);
 	float4 ambientSource = float4(0.2f, 0.2f, 0.2f, 1.0f);
 
+	float4 light = g_lightDirection;
+	light = normalize(light);
+	light = clamp(dot(inData.normal, light), 0, 1);
+
 	float4 diffuse;
 	float4 ambient;
 	if (g_isTexture == false)
 	{
-		diffuse = lightSource * g_diffuseColor * inData.color;
+		diffuse = lightSource * g_diffuseColor * light;
 		ambient = lightSource * g_diffuseColor * ambientSource;
 	}
 	else
 	{
-		diffuse = lightSource * g_texture.Sample(g_sampler, inData.uv) * inData.color;
+		diffuse = lightSource * g_texture.Sample(g_sampler, inData.uv) * light;
 		ambient = lightSource * g_texture.Sample(g_sampler, inData.uv) * ambientSource;
 	}
 
@@ -83,8 +84,7 @@ float4 PS(VS_OUT inData) : SV_Target
 	float4 speculerColor = float4(1.0, 0.5, 1.0, 1.0);	//スペキュラーの色これも係数
 	float4 lightDir = normalize(g_lightDirection);	//のーまらいずされた値
 
-	float nR = 2.0f * inData.color * dot(inData.color, lightDir) - lightDir;
-	float nV = normalize(inData.eye.xyz - inData.pos.xyz);
+	float nR = 2.0f * inData.normal * dot(inData.normal, lightDir) - lightDir;
 	float nI = pow(saturate(dot(nR, inData.eye)), shuniness);
 
 	return (diffuse + ambient) + ( nI * speculerColor);

@@ -61,18 +61,20 @@ void Stage::Update()
 void Stage::Draw()
 {
     Transform blockTrans;
-    blockTrans.position_ = XMFLOAT3(0.0f, 0.8f, 0.0f);
+    blockTrans.position_ = XMFLOAT3(0.0f, 0.0f, 0.0f);
     Model::SetTransform(hModel_, blockTrans);
     Model::Draw(hModel_);
 
     Transform groundTrans;
     groundTrans.scale_ = XMFLOAT3(6.0f, 6.0f, 6.0f);
+    groundTrans.position_ = XMFLOAT3(0.0f, -0.8f, 0.0f);
     Model::SetTransform(hModel[0], groundTrans);
     Model::Draw(hModel[0]);
 
     XMFLOAT3 arrowRotate[3] = { XMFLOAT3(90.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 90.0f) };
     for (int i = 0; i < 3; i++) {
         Transform arrowTrans;
+        arrowTrans.position_ = XMFLOAT3(0.0f, -0.8f, 0.0f);
         arrowTrans.rotate_ = arrowRotate[i];
         arrowTrans.scale_ = XMFLOAT3(0.2f, 0.2f, 0.2f);
         Model::SetTransform(hModel[1], arrowTrans);
