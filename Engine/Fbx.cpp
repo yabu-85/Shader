@@ -175,6 +175,7 @@ void Fbx::InitConstantBuffer()
 	cb.MiscFlags = 0;
 	cb.StructureByteStride = 0;
 
+	//これでバッファの大きさ決めてるんよね、structの構造どうせなら全部XMFLOAT4でintとかはすべて同じ値入れるといい
 	HRESULT hr;
 	hr = Direct3D::pDevice_->CreateBuffer(&cb, nullptr, &pConstantBuffer_);
 	if (FAILED(hr))
@@ -236,18 +237,15 @@ void Fbx::Draw(Transform& transform)
 	Direct3D::SetShader(SHADER_3D);
 	transform.Calclation();//トランスフォームを計算
 
-	XMFLOAT4 light = XMFLOAT4(-1, 0.5, -0.7, 0);
-	XMFLOAT3 cameraPos = Camera::GetPosition();
-
 	//コンスタントバッファに情報を渡す
 	for (int i = 0; i < materialCount_; i++)
 	{
 		CONSTANT_BUFFER cb;
 		cb.matWVP = XMMatrixTranspose(transform.GetWorldMatrix() * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());
-		cb.matNormal = XMMatrixTranspose(transform.GetNormalMatrix());
+		cb.matW = XMMatrixTranspose(transform.GetNormalMatrix());
 		cb.diffuseColor = pMaterialList_[i].diffuse;
-		cb.lightDirection = light;
-		cb.cameraPos = XMFLOAT4(cameraPos.x, cameraPos.y, cameraPos.z, 0);
+		cb.lightDirection = XMFLOAT4(0, 0.5, 3.0, 0);
+		XMStoreFloat4(&cb.eyePos, Camera::GetPosition());
 		cb.isTextured = pMaterialList_[i].pTexture != nullptr;
 
 		D3D11_MAPPED_SUBRESOURCE pdata;
@@ -267,7 +265,7 @@ void Fbx::Draw(Transform& transform)
 		offset = 0;
 		Direct3D::pContext_->IASetIndexBuffer(pIndexBuffer_[i], DXGI_FORMAT_R32_UINT, 0);
 
-		//コンスタントバッファ
+		// コンスタントバッファにこのバッファを使うように指示してる
 		Direct3D::pContext_->VSSetConstantBuffers(0, 1, &pConstantBuffer_);	//頂点シェーダー用	
 		Direct3D::pContext_->PSSetConstantBuffers(0, 1, &pConstantBuffer_);	//ピクセルシェーダー用
 
