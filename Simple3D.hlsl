@@ -47,7 +47,7 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
 	outData.normal = normal;
 
 	//視線ベクトル（ハイライトの計算に必要
-	float4 worldPos = mul(pos, g_matW);					//ローカル座標にワールド行列をかけてワールド座標へ
+	float4 worldPos = mul(pos, g_matWVP);				//ローカル座標にワールド行列をかけてワールド座標へ
 	outData.eye = normalize(g_eyePosition - worldPos);	//視点から頂点位置を引き算し視線を求めてピクセルシェーダーへ
 
 	//まとめて出力
@@ -80,12 +80,14 @@ float4 PS(VS_OUT inData) : SV_Target
 	}
 
 	//鏡面反射光（スペキュラー）
-	float shuniness = 2.0;						//スペキュラーの強さトリマ係数
-	float4 speculerColor = float4(1.0, 0.5, 1.0, 1.0);	//スペキュラーの色これも係数
-	float4 lightDir = normalize(g_lightDirection);	//のーまらいずされた値
+	float shuniness = 20.0;										//スペキュラーの強さトリマ係数
+	float4 speculerColor = float4(1.0, 1.0, 1.0, 1.0);			//スペキュラーの色これも係数
+	float4 lightDir = normalize(g_lightDirection);
+	lightDir = normalize((inData.pos) - lightDir);
+	inData.normal = normalize(inData.normal);
 
 	float nR = 2.0f * inData.normal * dot(inData.normal, lightDir) - lightDir;
-	float nI = pow(saturate(dot(nR, inData.eye)), shuniness);
+	float nI = pow(saturate(dot(nR, inData.eye)), shuniness) * speculerColor;
 
-	return (diffuse + ambient) + ( nI * speculerColor);
+	return (diffuse + ambient + nI);
 }
