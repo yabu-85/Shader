@@ -26,11 +26,12 @@ class Fbx
 
 	struct CONSTANT_BUFFER
 	{
-		XMMATRIX	matWVP;			// ワールド行列・ビュー行列・射影行列の合成行列
-		XMMATRIX	matW;			// 法線行列 ( ワールド行列だけのやつ
+		XMMATRIX	matWVP;			// ワールドビュープロジェクション行列
+		XMMATRIX	matW;			// ワールド変換のみ
+		XMMATRIX	matNormal;		// スケールX平行移動の逆行列
 		XMFLOAT4	diffuseColor;   // ディフューズカラー
-		XMFLOAT4	lightDirection;	// ライトの向き
-		XMFLOAT4	eyePos;			//カメラの位置
+		XMFLOAT4	lightPosition;	// ライトの向き
+		XMFLOAT4	eyePos;			// カメラの位置
 		int			isTextured;		// テクスチャを使用するかのフラグ
 	};
 

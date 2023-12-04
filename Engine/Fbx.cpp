@@ -232,19 +232,30 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode, bool isFlatColor)
 	}
 }
 
+#include "Input.h"
+namespace {
+	XMFLOAT4 lightPosition{};
+}
+
 void Fbx::Draw(Transform& transform)
 {
 	Direct3D::SetShader(SHADER_3D);
 	transform.Calclation();//トランスフォームを計算
+
+	if (Input::IsKey(DIK_UPARROW)) lightPosition.z += 0.2f;
+	if (Input::IsKey(DIK_DOWNARROW)) lightPosition.z -= 0.2f;
+	if (Input::IsKey(DIK_LEFTARROW)) lightPosition.x -= 0.2f;
+	if (Input::IsKey(DIK_RIGHTARROW)) lightPosition.x += 0.2f;
 
 	//コンスタントバッファに情報を渡す
 	for (int i = 0; i < materialCount_; i++)
 	{
 		CONSTANT_BUFFER cb;
 		cb.matWVP = XMMatrixTranspose(transform.GetWorldMatrix() * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());
-		cb.matW = XMMatrixTranspose(transform.GetNormalMatrix());
+		cb.matW = XMMatrixTranspose(transform.GetWorldMatrix());
+		cb.matNormal = XMMatrixTranspose(transform.GetNormalMatrix());
 		cb.diffuseColor = pMaterialList_[i].diffuse;
-		cb.lightDirection = XMFLOAT4(1, 1, 1, 0);
+		cb.lightPosition = lightPosition;
 		XMStoreFloat4(&cb.eyePos, Camera::GetPosition());
 		cb.isTextured = pMaterialList_[i].pTexture != nullptr;
 
