@@ -242,6 +242,8 @@ void Fbx::Draw(Transform& transform)
 	Direct3D::SetShader(SHADER_3D);
 	transform.Calclation();//トランスフォームを計算
 
+	if (Input::IsKey(DIK_1)) lightPosition.y -= 0.2f;
+	if (Input::IsKey(DIK_3)) lightPosition.y += 0.2f;
 	if (Input::IsKey(DIK_UPARROW)) lightPosition.z += 0.2f;
 	if (Input::IsKey(DIK_DOWNARROW)) lightPosition.z -= 0.2f;
 	if (Input::IsKey(DIK_LEFTARROW)) lightPosition.x -= 0.2f;
@@ -259,14 +261,13 @@ void Fbx::Draw(Transform& transform)
 		XMStoreFloat4(&cb.eyePos, Camera::GetPosition());
 		cb.isTextured = pMaterialList_[i].pTexture != nullptr;
 
-		
 		D3D11_MAPPED_SUBRESOURCE pdata;
 		Direct3D::pContext_->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
 		memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));	// データを値を送る
 		Direct3D::pContext_->Unmap(pConstantBuffer_, 0);	//再開
 	
-		//
-	//	Direct3D::pContext_->UpdateSubresource(pConstantBuffer_, 0, NULL, &cb, 0, 0);
+		//コンスタントバッファを複数使うときにたぶん使う
+		//Direct3D::pContext_->UpdateSubresource(pConstantBuffer_, 0, NULL, &cb, 0, 0);
 		
 		//各情報をパイプラインにセット
 		//頂点バッファ

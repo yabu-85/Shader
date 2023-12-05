@@ -92,14 +92,12 @@ float4 PS(VS_OUT inData) : SV_Target
 	//鏡面反射光（スペキュラー）
 	float shuniness = 8.0;										//スペキュラーの強さトリマ係数
 	float4 speculerColor = float4(1.0, 1.0, 1.0, 1.0);			//スペキュラーの色これも係数
-	float4 lightDir = normalize(g_lightPosition);
-	inData.normal = normalize(inData.normal);
 
-	float reflect = 2.0f * inData.normal * dot(inData.normal, lightDir) - lightDir;
-	float specular = pow(saturate(dot(reflect, inData.eye)), shuniness) * speculerColor;
+	float specular = float4(0, 0, 0, 0);
+	
 
 	float NL = saturate(dot(inData.normal, normalize(g_lightPosition)));
-	reflect = normalize(2 * NL * inData.normal - normalize(g_lightPosition));
+	float reflect = normalize(2 * NL * inData.normal - normalize(g_lightPosition));
 	specular = pow(saturate(dot(reflect, normalize(inData.eye))), shuniness);
 
 	return (diffuse + ambient + specular);

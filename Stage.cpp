@@ -46,7 +46,7 @@ Stage::~Stage()
 void Stage::Initialize()
 {
     //モデルデータのロード
-    hModel_ = Model::Load("Assets/numberCube.fbx");
+    hModel_ = Model::Load("Assets/testTorus.fbx");
     assert(hModel_ >= 0);
 
     hModel[0] = Model::Load("Assets/ground.fbx");
@@ -79,8 +79,8 @@ void Stage::Update()
 
     Camera::SetPosition(camPos);
 
-    if (Input::IsKey(DIK_Q)) lightPosition.y -= 0.2f;
-    if (Input::IsKey(DIK_E)) lightPosition.y += 0.2f;
+    if (Input::IsKey(DIK_1)) lightPosition.y -= 0.2f;
+    if (Input::IsKey(DIK_3)) lightPosition.y += 0.2f;
     if (Input::IsKey(DIK_UPARROW)) lightPosition.z += 0.2f;
     if (Input::IsKey(DIK_DOWNARROW)) lightPosition.z -= 0.2f;
     if (Input::IsKey(DIK_LEFTARROW)) lightPosition.x -= 0.2f;
