@@ -12,6 +12,25 @@ namespace {
 
 }
 
+void Stage::InitConstantBuffer()
+{
+    D3D11_BUFFER_DESC cb{};
+    cb.ByteWidth = sizeof(CONSTANT_BUFFER);
+    cb.Usage = D3D11_USAGE_DYNAMIC;
+    cb.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cb.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cb.MiscFlags = 0;
+    cb.StructureByteStride = 0;
+
+    //これでバッファの大きさ決めてるんよね、structの構造どうせなら全部XMFLOAT4でintとかはすべて同じ値入れるといい
+    HRESULT hr;
+    hr = Direct3D::pDevice_->CreateBuffer(&cb, nullptr, &pConstantBuffer_);
+    if (FAILED(hr))
+    {
+        MessageBox(NULL, "コンスタントバッファの作成に失敗しました", "エラー", MB_OK);
+    }
+}
+
 //コンストラクタ
 Stage::Stage(GameObject* parent)
     :GameObject(parent, "Stage"), hModel_(-1)
@@ -41,6 +60,11 @@ void Stage::Initialize()
     camPos = XMFLOAT3(0.0f, 3.0f, 5.0f);
     Camera::SetTarget(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
+    InitConstantBuffer();
+}
+
+namespace {
+    XMFLOAT4 lightPosition{};
 }
 
 //更新
@@ -54,6 +78,22 @@ void Stage::Update()
     if (Input::IsKey(DIK_Q)) camPos.y -= 0.1f;
 
     Camera::SetPosition(camPos);
+
+    if (Input::IsKey(DIK_Q)) lightPosition.y -= 0.2f;
+    if (Input::IsKey(DIK_E)) lightPosition.y += 0.2f;
+    if (Input::IsKey(DIK_UPARROW)) lightPosition.z += 0.2f;
+    if (Input::IsKey(DIK_DOWNARROW)) lightPosition.z -= 0.2f;
+    if (Input::IsKey(DIK_LEFTARROW)) lightPosition.x -= 0.2f;
+    if (Input::IsKey(DIK_RIGHTARROW)) lightPosition.x += 0.2f;
+
+    CONSTANT_BUFFER cb;
+    cb.lightPosition = lightPosition;
+    XMStoreFloat4(&cb.eyePos, Camera::GetPosition());
+
+    D3D11_MAPPED_SUBRESOURCE pdata;
+    Direct3D::pContext_->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
+    memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));	// データを値を送る
+    Direct3D::pContext_->Unmap(pConstantBuffer_, 0);	//再開
 
 }
 
