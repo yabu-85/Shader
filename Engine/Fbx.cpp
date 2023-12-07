@@ -193,14 +193,31 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode, bool isFlatColor)
 	for (int i = 0; i < materialCount_; i++)
 	{
 		//i番目のマテリアル情報を取得
-		FbxSurfaceMaterial* pMaterial = pNode->GetMaterial(i);
+		FbxSurfacePhong* pMaterial = (FbxSurfacePhong*)pNode->GetMaterial(i);
+
+		//マテリアルの色
+		FbxDouble3  diffuse = pMaterial->Diffuse;
+		FbxDouble3  ambient = pMaterial->Ambient;
+		pMaterialList_[i].diffuse = XMFLOAT4((float)diffuse[0], (float)diffuse[1], (float)diffuse[2], 1.0f);
+		pMaterialList_[i].ambient = XMFLOAT4((float)ambient[0], (float)ambient[1], (float)ambient[2], 1.0f);
+		pMaterialList_[i].speculer = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+		pMaterialList_[i].shininess = 0.0f;
+
+		if (pMaterial->GetClassId().Is(FbxSurfacePhong::ClassId))
+		{
+			FbxDouble3  speculer = pMaterial->Specular;
+			pMaterialList_[i].speculer = XMFLOAT4((float)speculer[0], (float)speculer[1], (float)speculer[2], 1.0f);
+			pMaterialList_[i].shininess = pMaterial->Shininess;
+		}
+
+		pMaterialList_[i].pTexture = nullptr;
 
 		//テクスチャ情報
 		FbxProperty  lProperty = pMaterial->FindProperty(FbxSurfaceMaterial::sDiffuse);
 
 		//テクスチャの数数
 		int fileTextureCount = lProperty.GetSrcObjectCount<FbxFileTexture>();
-		
+
 		//テクスチャあり
 		if (!isFlatColor && fileTextureCount) {
 			FbxFileTexture* textureInfo = lProperty.GetSrcObject<FbxFileTexture>(0);
@@ -216,18 +233,6 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode, bool isFlatColor)
 			pMaterialList_[i].pTexture = new Texture;
 			HRESULT hr = pMaterialList_[i].pTexture->Load(name);
 			assert(hr == S_OK);
-
-		}
-
-		//テクスチャ無し
-		else
-		{
-			pMaterialList_[i].pTexture = nullptr;
-
-			//マテリアルの色
-			FbxSurfaceLambert* pMaterial = (FbxSurfaceLambert*)pNode->GetMaterial(i);
-			FbxDouble3  diffuse = pMaterial->Diffuse;
-			pMaterialList_[i].diffuse = XMFLOAT4((float)diffuse[0], (float)diffuse[1], (float)diffuse[2], 1.0f);
 		}
 	}
 }
@@ -257,8 +262,11 @@ void Fbx::Draw(Transform& transform)
 		cb.matW = XMMatrixTranspose(transform.GetWorldMatrix());
 		cb.matNormal = XMMatrixTranspose(transform.GetNormalMatrix());
 		cb.diffuseColor = pMaterialList_[i].diffuse;
+		cb.ambientColor = pMaterialList_[i].ambient;
 		cb.lightPosition = lightPosition;
 		XMStoreFloat4(&cb.eyePos, Camera::GetPosition());
+		cb.speculer = pMaterialList_[i].speculer;
+		cb.shininess = pMaterialList_[i].shininess;
 		cb.isTextured = pMaterialList_[i].pTexture != nullptr;
 
 		D3D11_MAPPED_SUBRESOURCE pdata;

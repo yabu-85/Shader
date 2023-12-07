@@ -14,8 +14,11 @@ cbuffer global : register(b0)
 	float4x4	g_matW;				// ワールド行列
 	float4x4	g_matNormal;		// 
 	float4		g_diffuseColor;		// ディフューズカラー（マテリアルの色）
+	float4		g_ambientColor;		// 環境光の色
 	float4		g_lightPosition;	// ライトの向き
 	float4		g_eyePosition;		// カメラの向き
+	float4		g_specular;			// 鏡面反射光の色
+	float		g_shuniness;		// 鏡面反射光の強さ
 	bool		g_isTexture;		// テクスチャ貼ってあるかどうか
 };
 
@@ -74,31 +77,27 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
 float4 PS(VS_OUT inData) : SV_Target
 {
 	float4 lightSource = float4(1.0f, 1.0f, 1.0f, 1.0f);
-	float4 ambientSource = float4(0.2f, 0.2f, 0.2f, 1.0f);
 
 	float4 diffuse;
 	float4 ambient;
 	if (g_isTexture == false)
 	{
 		diffuse = lightSource * g_diffuseColor * inData.color;
-		ambient = lightSource * g_diffuseColor * ambientSource;
+		ambient = lightSource * g_diffuseColor * g_ambientColor;
 	}
 	else
 	{
 		diffuse = lightSource * g_texture.Sample(g_sampler, inData.uv) * inData.color;
-		ambient = lightSource * g_texture.Sample(g_sampler, inData.uv) * ambientSource;
+		ambient = lightSource * g_texture.Sample(g_sampler, inData.uv) * g_ambientColor;
 	}
 
 	//鏡面反射光（スペキュラー）
-	float shuniness = 8.0;										//スペキュラーの強さトリマ係数
-	float4 speculerColor = float4(1.0, 1.0, 1.0, 1.0);			//スペキュラーの色これも係数
-
-	float specular = float4(0, 0, 0, 0);
-	
-
-	float NL = saturate(dot(inData.normal, normalize(g_lightPosition)));
-	float reflect = normalize(2 * NL * inData.normal - normalize(g_lightPosition));
-	specular = pow(saturate(dot(reflect, normalize(inData.eye))), shuniness);
+	float4 specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	if (g_specular.w > 0.0f) {
+		float NL = saturate(dot(inData.normal, normalize(g_lightPosition)));
+		float reflect = normalize(2 * NL * inData.normal - normalize(g_lightPosition));
+		specular = pow(saturate(dot(reflect, normalize(inData.eye))), g_shuniness) * g_specular;
+	}
 
 	return (diffuse + ambient + specular);
 }

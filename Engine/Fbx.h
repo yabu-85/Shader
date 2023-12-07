@@ -22,6 +22,9 @@ class Fbx
 	{
 		Texture*	pTexture;		// テクスチャへのポインタ
 		XMFLOAT4	diffuse;		// ディフューズカラー
+		XMFLOAT4	ambient;		// 環境光
+		XMFLOAT4	speculer;		// 鏡面反射光の色
+		float		shininess;		// 鏡面反射光の強さ
 	};
 
 	struct CONSTANT_BUFFER
@@ -30,8 +33,11 @@ class Fbx
 		XMMATRIX	matW;			// ワールド変換のみ
 		XMMATRIX	matNormal;		// スケールX平行移動の逆行列
 		XMFLOAT4	diffuseColor;   // ディフューズカラー
+		XMFLOAT4	ambientColor;   // 環境光のカラー
 		XMFLOAT4	lightPosition;	// ライトの向き
 		XMFLOAT4	eyePos;			// カメラの位置
+		XMFLOAT4	speculer;		// 反射光の色
+		float		shininess;		// 反射光の強さ
 		int			isTextured;		// テクスチャを使用するかのフラグ
 	};
 
