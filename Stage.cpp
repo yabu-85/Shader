@@ -1,30 +1,29 @@
 #include "Engine/Model.h"
 #include "Stage.h"
-#include "Engine/Sprite.h"
 #include "Engine/Camera.h"
 #include "Engine/Input.h"
 
 namespace {
-    Sprite* img = nullptr;
+    const XMFLOAT4 DEF_LIGHT_POSITION = { 0.0f, 0.0f, 0.0f, 0.0f };
+    const XMFLOAT3 arrowRotate[3] = { XMFLOAT3(90.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 90.0f) };
 
-    int hModel[2] = { -1, -1 };
     XMFLOAT3 camPos{};
-
+    Transform blockTrans;
 }
 
 void Stage::InitConstantBuffer()
 {
     D3D11_BUFFER_DESC cb{};
-    cb.ByteWidth = sizeof(CONSTANT_BUFFER);
-    cb.Usage = D3D11_USAGE_DYNAMIC;
+    cb.ByteWidth = sizeof(CBUFF_STAGESCENE);
+    cb.Usage = D3D11_USAGE_DEFAULT;  // D311_USAGE_DEFAULT || D3D11_USAGE_DEFAULT
     cb.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    cb.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cb.CPUAccessFlags = 0;  // D3D11_CPU_ACCESS_WRITE
     cb.MiscFlags = 0;
     cb.StructureByteStride = 0;
 
     //これでバッファの大きさ決めてるんよね、structの構造どうせなら全部XMFLOAT4でintとかはすべて同じ値入れるといい
     HRESULT hr;
-    hr = Direct3D::pDevice_->CreateBuffer(&cb, nullptr, &pConstantBuffer_);
+    hr = Direct3D::pDevice_->CreateBuffer(&cb, nullptr, &pCBStageScene_);
     if (FAILED(hr))
     {
         MessageBox(NULL, "コンスタントバッファの作成に失敗しました", "エラー", MB_OK);
@@ -33,7 +32,7 @@ void Stage::InitConstantBuffer()
 
 //コンストラクタ
 Stage::Stage(GameObject* parent)
-    :GameObject(parent, "Stage"), hModel_(-1)
+    :GameObject(parent, "Stage"), hModel_{-1, -1, -1}, pCBStageScene_(nullptr), lightSourcePosition_(DEF_LIGHT_POSITION)
 {
 }
 
@@ -46,25 +45,17 @@ Stage::~Stage()
 void Stage::Initialize()
 {
     //モデルデータのロード
-    hModel_ = Model::Load("Assets/testTorus.fbx");
-    assert(hModel_ >= 0);
-
-    hModel[0] = Model::Load("Assets/ground.fbx");
-    assert(hModel[0] >= 0);
-    hModel[1] = Model::Load("Assets/arrow.fbx");
-    assert(hModel[1] >= 0);
-
-    //img = new Sprite();
-    //img->Initialize("neko.png");
+    hModel_[0] = Model::Load("Assets/testTorus.fbx");
+    assert(hModel_[0] >= 0);
+    hModel_[1] = Model::Load("Assets/ground.fbx");
+    assert(hModel_[1] >= 0);
+    hModel_[2] = Model::Load("Assets/arrow.fbx");
+    assert(hModel_[2] >= 0);
 
     camPos = XMFLOAT3(0.0f, 3.0f, 5.0f);
     Camera::SetTarget(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
     InitConstantBuffer();
-}
-
-namespace {
-    XMFLOAT4 lightPosition{};
 }
 
 //更新
@@ -79,51 +70,49 @@ void Stage::Update()
 
     Camera::SetPosition(camPos);
 
-    if (Input::IsKey(DIK_1)) lightPosition.y -= 0.2f;
-    if (Input::IsKey(DIK_3)) lightPosition.y += 0.2f;
-    if (Input::IsKey(DIK_UPARROW)) lightPosition.z += 0.2f;
-    if (Input::IsKey(DIK_DOWNARROW)) lightPosition.z -= 0.2f;
-    if (Input::IsKey(DIK_LEFTARROW)) lightPosition.x -= 0.2f;
-    if (Input::IsKey(DIK_RIGHTARROW)) lightPosition.x += 0.2f;
+    if (Input::IsKey(DIK_1)) lightSourcePosition_.y -= 0.2f;
+    if (Input::IsKey(DIK_3)) lightSourcePosition_.y += 0.2f;
+    if (Input::IsKey(DIK_UPARROW)) lightSourcePosition_.z += 0.2f;
+    if (Input::IsKey(DIK_DOWNARROW)) lightSourcePosition_.z -= 0.2f;
+    if (Input::IsKey(DIK_LEFTARROW)) lightSourcePosition_.x -= 0.2f;
+    if (Input::IsKey(DIK_RIGHTARROW)) lightSourcePosition_.x += 0.2f;
 
-    CONSTANT_BUFFER cb;
-    cb.lightPosition = lightPosition;
+    CBUFF_STAGESCENE cb;
+    cb.lightPosition = lightSourcePosition_;
     XMStoreFloat4(&cb.eyePos, Camera::GetPosition());
 
-    D3D11_MAPPED_SUBRESOURCE pdata;
-    Direct3D::pContext_->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
-    memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));	// データを値を送る
-    Direct3D::pContext_->Unmap(pConstantBuffer_, 0);	//再開
+    Direct3D::pContext_->UpdateSubresource(pCBStageScene_, 0, NULL, &cb, 0, 0);
 
+    //左の番号がどこに送るかの番号 (b1)
+    Direct3D::pContext_->VSSetConstantBuffers(1, 1, &pCBStageScene_);
+    Direct3D::pContext_->PSSetConstantBuffers(1, 1, &pCBStageScene_);
 }
 
 //描画
 void Stage::Draw()
 {
-    Transform blockTrans;
     blockTrans.position_ = XMFLOAT3(0.0f, 0.0f, 0.0f);
-    Model::SetTransform(hModel_, blockTrans);
-    Model::Draw(hModel_);
+    blockTrans.rotate_.y += 1.0f;
+    Model::SetTransform(hModel_[0], blockTrans);
+    Model::Draw(hModel_[0]);
 
+    //Planeの表示
+#if 0
     Transform groundTrans;
     groundTrans.scale_ = XMFLOAT3(6.0f, 6.0f, 6.0f);
     groundTrans.position_ = XMFLOAT3(0.0f, -0.8f, 0.0f);
-    Model::SetTransform(hModel[0], groundTrans);
-    Model::Draw(hModel[0]);
+    Model::SetTransform(hModel[1], groundTrans);
+    Model::Draw(hModel[1]);
+#endif
 
-    XMFLOAT3 arrowRotate[3] = { XMFLOAT3(90.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 90.0f) };
     for (int i = 0; i < 3; i++) {
         Transform arrowTrans;
         arrowTrans.position_ = XMFLOAT3(0.0f, -0.8f, 0.0f);
         arrowTrans.rotate_ = arrowRotate[i];
         arrowTrans.scale_ = XMFLOAT3(0.2f, 0.2f, 0.2f);
-        Model::SetTransform(hModel[1], arrowTrans);
-        Model::Draw(hModel[1]);
+        Model::SetTransform(hModel_[2], arrowTrans);
+        Model::Draw(hModel_[2]);
     }
-    
-    blockTrans.scale_ = XMFLOAT3(1.5f, 1.5f, 1.5f);
-   
-    //img->Draw(blockTrans);
     
 }
 

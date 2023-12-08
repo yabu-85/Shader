@@ -15,17 +15,15 @@ cbuffer global : register(b0)
 	float4x4	g_matNormal;		// 
 	float4		g_diffuseColor;		// ディフューズカラー（マテリアルの色）
 	float4		g_ambientColor;		// 環境光の色
-	float4		g_lightPosition;	// ライトの向き
-	float4		g_eyePosition;		// カメラの向き
 	float4		g_specular;			// 鏡面反射光の色
 	float		g_shuniness;		// 鏡面反射光の強さ
 	bool		g_isTexture;		// テクスチャ貼ってあるかどうか
 };
 
-cbuffer light : register(b0) 
+cbuffer light : register(b1) 
 {
-//	float4		g_lightPosition;	// ライトの向き
-//	float4		g_eyePosition;		// カメラの向き
+	float4		g_lightPosition;	// ライトの向き
+	float4		g_eyePosition;		// カメラの向き
 };
 
 //───────────────────────────────────────

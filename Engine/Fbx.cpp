@@ -169,9 +169,9 @@ void Fbx::InitConstantBuffer()
 {
 	D3D11_BUFFER_DESC cb{};
 	cb.ByteWidth = sizeof(CONSTANT_BUFFER);
-	cb.Usage = D3D11_USAGE_DYNAMIC;  // D311_USAGE_DEFAULT
+	cb.Usage = D3D11_USAGE_DEFAULT;  // D311_USAGE_DEFAULT || D3D11_USAGE_DEFAULT
 	cb.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	cb.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;  // 0
+	cb.CPUAccessFlags = 0;  // D3D11_CPU_ACCESS_WRITE
 	cb.MiscFlags = 0;
 	cb.StructureByteStride = 0;
 
@@ -263,19 +263,19 @@ void Fbx::Draw(Transform& transform)
 		cb.matNormal = XMMatrixTranspose(transform.GetNormalMatrix());
 		cb.diffuseColor = pMaterialList_[i].diffuse;
 		cb.ambientColor = pMaterialList_[i].ambient;
-		cb.lightPosition = lightPosition;
-		XMStoreFloat4(&cb.eyePos, Camera::GetPosition());
+		//cb.lightPosition = lightPosition;
+		//XMStoreFloat4(&cb.eyePos, Camera::GetPosition());
 		cb.speculer = pMaterialList_[i].speculer;
 		cb.shininess = pMaterialList_[i].shininess;
 		cb.isTextured = pMaterialList_[i].pTexture != nullptr;
 
-		D3D11_MAPPED_SUBRESOURCE pdata;
-		Direct3D::pContext_->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
-		memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));	// データを値を送る
-		Direct3D::pContext_->Unmap(pConstantBuffer_, 0);	//再開
+	//	D3D11_MAPPED_SUBRESOURCE pdata;
+	//	Direct3D::pContext_->Map(pConstantBuffer_, 0, D3D11_MAP_WRITE_DISCARD, 0, &pdata);	// GPUからのデータアクセスを止める
+	//	memcpy_s(pdata.pData, pdata.RowPitch, (void*)(&cb), sizeof(cb));	// データを値を送る
+	//	Direct3D::pContext_->Unmap(pConstantBuffer_, 0);	//再開
 	
-		//コンスタントバッファを複数使うときにたぶん使う
-		//Direct3D::pContext_->UpdateSubresource(pConstantBuffer_, 0, NULL, &cb, 0, 0);
+		//データ送るときエラーが出なければこっちを使ったほうがいい
+		Direct3D::pContext_->UpdateSubresource(pConstantBuffer_, 0, NULL, &cb, 0, 0);
 		
 		//各情報をパイプラインにセット
 		//頂点バッファ
@@ -289,6 +289,7 @@ void Fbx::Draw(Transform& transform)
 		Direct3D::pContext_->IASetIndexBuffer(pIndexBuffer_[i], DXGI_FORMAT_R32_UINT, 0);
 
 		// コンスタントバッファにこのバッファを使うように指示してる
+		// 左の番号はHlslのレジスタの番号 (b0)
 		Direct3D::pContext_->VSSetConstantBuffers(0, 1, &pConstantBuffer_);	//頂点シェーダー用	
 		Direct3D::pContext_->PSSetConstantBuffers(0, 1, &pConstantBuffer_);	//ピクセルシェーダー用
 
