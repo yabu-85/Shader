@@ -58,12 +58,11 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
 	outData.normal = normal;
 
 	float4 light = normalize(g_lightPosition);
-	light = normalize(light);
-	outData.color = saturate(dot(normal, light));
+	outData.color = saturate(dot(normal, light)); //saturateが 0～１に収めるclamp
 
 	//視線ベクトル（ハイライトの計算に必要
 	float4 worldPos = mul(pos, g_matW);					//ローカル座標にワールド行列をかけてワールド座標へ
-	outData.eye = normalize(g_eyePosition - worldPos);	//視点から頂点位置を引き算し視線を求めてピクセルシェーダーへ
+	outData.eye = g_eyePosition - worldPos;	//視点から頂点位置を引き算し視線を求めてピクセルシェーダーへ
 
 	//まとめて出力
 	return outData;
@@ -91,11 +90,19 @@ float4 PS(VS_OUT inData) : SV_Target
 
 	//鏡面反射光（スペキュラー）
 	float4 specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	if (g_specular.w > 0.0f) {
-		float NL = saturate(dot(inData.normal, normalize(g_lightPosition)));
+//	if (g_specular.w > 0.0f) {
+		float NL = dot(inData.normal, normalize(g_lightPosition));
 		float reflect = normalize(2 * NL * inData.normal - normalize(g_lightPosition));
-		specular = pow(saturate(dot(reflect, normalize(inData.eye))), g_shuniness) * g_specular;
-	}
+		float4 reflection = reflect(normalize(-lightPosition), inData.normal);
+		specular = pow(saturate(dot(reflect, normalize(inData.eye))), 5.0f);// *g_specular;
+		specular = pow(saturate(dot(reflection, normalize(inData.eye))), 8);
+//	}
+
+	//ディフューズ拡散反射光
+	//拡散反射係数（色）＊入射光の強さ＊入射角（CosΘ）
+
+	//スペキュラー鏡面反射
+	//
 
 	return (diffuse + ambient + specular);
 }

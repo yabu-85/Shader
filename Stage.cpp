@@ -32,7 +32,7 @@ void Stage::InitConstantBuffer()
 
 //コンストラクタ
 Stage::Stage(GameObject* parent)
-    :GameObject(parent, "Stage"), hModel_{-1, -1, -1}, pCBStageScene_(nullptr), lightSourcePosition_(DEF_LIGHT_POSITION)
+    :GameObject(parent, "Stage"), hModel_{-1, -1, -1, -1}, pCBStageScene_(nullptr), lightSourcePosition_(DEF_LIGHT_POSITION)
 {
 }
 
@@ -51,6 +51,8 @@ void Stage::Initialize()
     assert(hModel_[1] >= 0);
     hModel_[2] = Model::Load("Assets/arrow.fbx");
     assert(hModel_[2] >= 0);
+    hModel_[3] = Model::Load("Assets/BoxBrick.fbx");
+    assert(hModel_[3] >= 0); 
 
     camPos = XMFLOAT3(0.0f, 3.0f, 5.0f);
     Camera::SetTarget(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -113,6 +115,12 @@ void Stage::Draw()
         Model::SetTransform(hModel_[2], arrowTrans);
         Model::Draw(hModel_[2]);
     }
+
+    Transform box;
+    box.scale_ = XMFLOAT3(0.3f, 0.3f, 0.3f);
+    box.position_ = XMFLOAT3(lightSourcePosition_.x, lightSourcePosition_.y, lightSourcePosition_.z);
+    Model::SetTransform(hModel_[3], box);
+    Model::Draw(hModel_[3]);
     
 }
 
