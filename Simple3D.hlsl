@@ -90,19 +90,18 @@ float4 PS(VS_OUT inData) : SV_Target
 
 	//鏡面反射光（スペキュラー）
 	float4 specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
-//	if (g_specular.w > 0.0f) {
+	if (g_specular.w > 0.0f) {
+
+#if 1
+		float4 reflection = reflect(normalize(-g_lightPosition), inData.normal);
+		specular = pow(saturate(dot(reflection, normalize(inData.eye))), g_shuniness) * g_specular;
+#else 
 		float NL = dot(inData.normal, normalize(g_lightPosition));
 		float reflect = normalize(2 * NL * inData.normal - normalize(g_lightPosition));
-		float4 reflection = reflect(normalize(-lightPosition), inData.normal);
-		specular = pow(saturate(dot(reflect, normalize(inData.eye))), 5.0f);// *g_specular;
-		specular = pow(saturate(dot(reflection, normalize(inData.eye))), 8);
-//	}
+		specular = pow(saturate(dot(reflect, normalize(inData.eye))), g_shuniness) * g_specular;
+#endif
 
-	//ディフューズ拡散反射光
-	//拡散反射係数（色）＊入射光の強さ＊入射角（CosΘ）
-
-	//スペキュラー鏡面反射
-	//
-
+	}
+	
 	return (diffuse + ambient + specular);
 }
