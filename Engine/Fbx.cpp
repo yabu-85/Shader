@@ -201,7 +201,7 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode, bool isFlatColor)
 		pMaterialList_[i].diffuse = XMFLOAT4((float)diffuse[0], (float)diffuse[1], (float)diffuse[2], 1.0f);
 		pMaterialList_[i].ambient = XMFLOAT4((float)ambient[0], (float)ambient[1], (float)ambient[2], 1.0f);
 		pMaterialList_[i].speculer = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-		pMaterialList_[i].shininess = 0.0f;
+		pMaterialList_[i].shininess = 1.0f;
 
 		if (pMaterial->GetClassId().Is(FbxSurfacePhong::ClassId))
 		{

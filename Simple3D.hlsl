@@ -89,19 +89,14 @@ float4 PS(VS_OUT inData) : SV_Target
 	}
 
 	//鏡面反射光（スペキュラー）
-	float4 specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	if (g_specular.w > 0.0f) {
-
 #if 1
-		float4 reflection = reflect(normalize(-g_lightPosition), inData.normal);
-		specular = pow(saturate(dot(reflection, normalize(inData.eye))), g_shuniness) * g_specular;
+	float4 reflection = reflect(normalize(-g_lightPosition), inData.normal);
+	float4 specular = pow(saturate(dot(reflection, normalize(inData.eye))), g_shuniness) * g_specular;
 #else 
-		float NL = dot(inData.normal, normalize(g_lightPosition));
-		float reflect = normalize(2 * NL * inData.normal - normalize(g_lightPosition));
-		specular = pow(saturate(dot(reflect, normalize(inData.eye))), g_shuniness) * g_specular;
+	float NL = dot(inData.normal, normalize(g_lightPosition));
+	float reflect = normalize(2 * NL * inData.normal - normalize(g_lightPosition));
+	float4 specular = pow(saturate(dot(reflect, normalize(inData.eye))), g_shuniness) * g_specular;
 #endif
 
-	}
-	
 	return (diffuse + ambient + specular);
 }
