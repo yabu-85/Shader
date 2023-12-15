@@ -15,6 +15,6 @@ namespace Model
 	};
 	int Load(std::string fileName, bool isFlatColor = false);
 	void SetTransform(int hModel, Transform transform);
-	void Draw(int hModel);
+	void Draw(int hModel, int type_ = 1);
 	void Release();
 }

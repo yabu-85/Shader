@@ -88,14 +88,17 @@ float4 PS(VS_OUT inData) : SV_Target
 		ambient = lightSource * g_texture.Sample(g_sampler, inData.uv) * g_ambientColor;
 	}
 
+	float4 lightDir = normalize(-g_lightPosition);
+	float4 eyeDir = normalize(inData.eye);
+
 	//鏡面反射光（スペキュラー）
-#if 1
-	float4 reflection = reflect(normalize(-g_lightPosition), inData.normal);
-	float4 specular = pow(saturate(dot(reflection, normalize(inData.eye))), g_shuniness) * g_specular;
+#if 0
+	float4 reflection = reflect(lightDir, inData.normal);
+	float4 specular = pow(saturate(dot(reflection, eyeDir)), g_shuniness) * g_specular;
 #else 
-	float NL = dot(inData.normal, normalize(g_lightPosition));
-	float reflect = normalize(2 * NL * inData.normal - normalize(g_lightPosition));
-	float4 specular = pow(saturate(dot(reflect, normalize(inData.eye))), g_shuniness) * g_specular;
+	float4 NL = dot(lightDir, inData.normal);
+	float4 reflection = lightDir - 2.0 * NL * inData.normal;
+	float4 specular = pow(saturate(dot(reflection, eyeDir)), g_shuniness) * g_specular;
 #endif
 
 	return (diffuse + ambient + specular);

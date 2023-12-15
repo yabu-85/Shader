@@ -71,6 +71,6 @@ class Fbx
 public:
 	Fbx();
 	HRESULT Load(std::string fileName, bool isFlatColor);		// FBXファイルの読み込み
-	void Draw(Transform& transform);							// FBXモデルの描画
+	void Draw(Transform& transform, int type_);							// FBXモデルの描画
 	void Release();												// メモリの解放
 };

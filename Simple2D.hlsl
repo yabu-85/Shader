@@ -63,8 +63,8 @@ float4 PS(VS_OUT inData) : SV_Target
 			output += g_texture.Sample(g_sampler, float2(inData.uv.x + (x * picSizeX), inData.uv.y + (y * picSizeY)));
 		}
 	}
+
 	output /= float(size * size);
 	return output;
-
 
 }

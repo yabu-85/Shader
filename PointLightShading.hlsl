@@ -8,16 +8,19 @@ SamplerState	g_sampler : register(s0);	//サンプラー
 // コンスタントバッファ
 // DirectX 側から送信されてくる、ポリゴン頂点以外の諸情報の定義
 //───────────────────────────────────────
-cbuffer global
+cbuffer global : register(b0)
 {
 	float4x4	g_matWVP;			// ワールド・ビュー・プロジェクションの合成行列
 	float4x4	g_matW;				// ワールド行列
 	float4x4	g_matNormal;		// 
 	float4		g_diffuseColor;		// ディフューズカラー（マテリアルの色）
+	float4		g_ambientColor;		// 環境光の色
+	float4		g_specular;			// 鏡面反射光の色
+	float		g_shuniness;		// 鏡面反射光の強さ
 	bool		g_isTexture;		// テクスチャ貼ってあるかどうか
 };
 
-cbuffer global
+cbuffer light : register(b1) 
 {
 	float4		g_lightPosition;	// ライトの向き
 	float4		g_eyePosition;		// カメラの向き
@@ -29,9 +32,10 @@ cbuffer global
 struct VS_OUT
 {
 	float4 pos    : SV_POSITION;	//位置
-	float4 normal : TEXCOORD0;			//法線
-	float4 eye	  : TEXCOORD1;		//視線
 	float2 uv	  : TEXCOORD2;		//uv座標
+	float4 color  : COLOR;			//色（明るさ）
+	float4 eye	  : TEXCOORD1;		//視線
+	float4 normal : TEXCOORD0;		//法線
 };
 
 //───────────────────────────────────────
@@ -50,11 +54,15 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
 	//法線を回転
 	normal.w = 0;
 	normal = mul(normal, g_matNormal);
+	normal = normalize(normal);
 	outData.normal = normal;
+
+	float4 light = normalize(g_lightPosition);
+	outData.color = saturate(dot(normal, light)); //saturateが 0～１に収めるclamp
 
 	//視線ベクトル（ハイライトの計算に必要
 	float4 worldPos = mul(pos, g_matW);					//ローカル座標にワールド行列をかけてワールド座標へ
-	outData.eye = normalize(g_eyePosition - worldPos);	//視点から頂点位置を引き算し視線を求めてピクセルシェーダーへ
+	outData.eye = g_eyePosition - worldPos;	//視点から頂点位置を引き算し視線を求めてピクセルシェーダーへ
 
 	//まとめて出力
 	return outData;
@@ -66,36 +74,32 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
 float4 PS(VS_OUT inData) : SV_Target
 {
 	float4 lightSource = float4(1.0f, 1.0f, 1.0f, 1.0f);
-	float4 ambientSource = float4(0.2f, 0.2f, 0.2f, 1.0f);
-
-	float4 light = g_lightPosition;
-	light = normalize(light);
-	light = clamp(dot(inData.normal, light), 0, 1);
 
 	float4 diffuse;
 	float4 ambient;
 	if (g_isTexture == false)
 	{
-		diffuse = lightSource * g_diffuseColor * light;
-		ambient = lightSource * g_diffuseColor * ambientSource;
+		diffuse = lightSource * g_diffuseColor * inData.color;
+		ambient = lightSource * g_diffuseColor * g_ambientColor;
 	}
 	else
 	{
-		diffuse = lightSource * g_texture.Sample(g_sampler, inData.uv) * light;
-		ambient = lightSource * g_texture.Sample(g_sampler, inData.uv) * ambientSource;
+		diffuse = lightSource * g_texture.Sample(g_sampler, inData.uv) * inData.color;
+		ambient = lightSource * g_texture.Sample(g_sampler, inData.uv) * g_ambientColor;
 	}
 
+	float4 lightDir = normalize(-g_lightPosition);
+	float4 eyeDir = normalize(inData.eye);
+
 	//鏡面反射光（スペキュラー）
-	float shuniness = 8.0;										//スペキュラーの強さトリマ係数
-	float4 speculerColor = float4(1.0, 1.0, 1.0, 1.0);			//スペキュラーの色これも係数
-	float4 lightDir = normalize(g_lightPosition);
-	inData.normal = normalize(inData.normal);
+#if 0
+	float4 reflection = reflect(lightDir, inData.normal);
+	float4 specular = pow(saturate(dot(reflection, eyeDir)), g_shuniness) * g_specular;
+#else 
+	float4 NL = dot(lightDir, inData.normal);
+	float4 reflection = lightDir - 2.0 * NL * inData.normal;
+	float4 specular = pow(saturate(dot(reflection, eyeDir)), g_shuniness) * g_specular;
+#endif
 
-	float nR = 2.0f * inData.normal * dot(inData.normal, lightDir) - lightDir;
-	float nI = pow(saturate(dot(nR, inData.eye)), shuniness) * speculerColor;
-	nR = reflect(lightDir, inData.normal);
-	nI = pow(saturate(dot(nR, inData.eye)), shuniness) * speculerColor;
-	if(nI < 0) nI = 0.0f;
-
-	return (diffuse + ambient + nI);
+	return (diffuse + ambient + specular);
 }
