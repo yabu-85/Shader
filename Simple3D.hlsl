@@ -75,6 +75,14 @@ float4 PS(VS_OUT inData) : SV_Target
 {
 	float4 lightSource = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
+	const int num = 3;
+	//inData.color = floor(inData.color * num) / num;
+	if (inData.color.x < 1 / 3.0) inData.color = float4(1.0f / num, 1.0f / num, 1.0f / num, 0);
+	else if (inData.color.x < 2 / 3.0) inData.color = float4(2.0f / num, 2.0f / num, 2.0f / num, 0);
+	else if (inData.color.x < 3 / 3.0) inData.color = float4(3.0f / num, 3.0f / num, 3.0f / num, 0);
+
+	return inData.color;
+
 	float4 diffuse;
 	float4 ambient;
 	if (g_isTexture == false)
@@ -93,9 +101,11 @@ float4 PS(VS_OUT inData) : SV_Target
 
 	//鏡面反射光（スペキュラー）
 #if 0
+	//リフレクト関数使ったやつ
 	float4 reflection = reflect(lightDir, inData.normal);
 	float4 specular = pow(saturate(dot(reflection, eyeDir)), g_shuniness) * g_specular;
 #else 
+	//正直に計算したやつ
 	float4 NL = dot(lightDir, inData.normal);
 	float4 reflection = lightDir - 2.0 * NL * inData.normal;
 	float4 specular = pow(saturate(dot(reflection, eyeDir)), g_shuniness) * g_specular;

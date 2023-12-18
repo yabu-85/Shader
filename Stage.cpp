@@ -9,6 +9,7 @@ namespace {
 
     XMFLOAT3 camPos{};
     Transform blockTrans;
+    bool isPointLight = false;
 }
 
 void Stage::InitConstantBuffer()
@@ -93,10 +94,13 @@ void Stage::Update()
 //•`‰æ
 void Stage::Draw()
 {
+    if (Input::IsKeyDown(DIK_F))
+        isPointLight = !isPointLight;
+
     blockTrans.position_ = XMFLOAT3(0.0f, 0.0f, 0.0f);
     blockTrans.rotate_.y += 1.0f;
     Model::SetTransform(hModel_[0], blockTrans);
-    Model::Draw(hModel_[0]);
+    Model::Draw(hModel_[0], isPointLight + 1);
 
     //Plane‚Ì•\Ž¦
 #if 0
@@ -104,7 +108,7 @@ void Stage::Draw()
     groundTrans.scale_ = XMFLOAT3(6.0f, 6.0f, 6.0f);
     groundTrans.position_ = XMFLOAT3(0.0f, -0.8f, 0.0f);
     Model::SetTransform(hModel[1], groundTrans);
-    Model::Draw(hModel[1]);
+    Model::Draw(hModel[1], isPointLight + 1);
 #endif
 
     for (int i = 0; i < 3; i++) {
@@ -113,14 +117,14 @@ void Stage::Draw()
         arrowTrans.rotate_ = arrowRotate[i];
         arrowTrans.scale_ = XMFLOAT3(0.2f, 0.2f, 0.2f);
         Model::SetTransform(hModel_[2], arrowTrans);
-        Model::Draw(hModel_[2]);
+        Model::Draw(hModel_[2], isPointLight + 1);
     }
 
     Transform box;
     box.scale_ = XMFLOAT3(0.3f, 0.3f, 0.3f);
     box.position_ = XMFLOAT3(lightSourcePosition_.x, lightSourcePosition_.y, lightSourcePosition_.z);
     Model::SetTransform(hModel_[3], box);
-    Model::Draw(hModel_[3]);
+    Model::Draw(hModel_[3], isPointLight + 1);
     
 }
 
