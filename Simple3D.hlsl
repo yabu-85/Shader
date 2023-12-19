@@ -75,14 +75,6 @@ float4 PS(VS_OUT inData) : SV_Target
 {
 	float4 lightSource = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	const int num = 3;
-	//inData.color = floor(inData.color * num) / num;
-	if (inData.color.x < 1 / 3.0) inData.color = float4(1.0f / num, 1.0f / num, 1.0f / num, 0);
-	else if (inData.color.x < 2 / 3.0) inData.color = float4(2.0f / num, 2.0f / num, 2.0f / num, 0);
-	else if (inData.color.x < 3 / 3.0) inData.color = float4(3.0f / num, 3.0f / num, 3.0f / num, 0);
-
-	return inData.color;
-
 	float4 diffuse;
 	float4 ambient;
 	if (g_isTexture == false)
