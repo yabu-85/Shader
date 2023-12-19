@@ -4,6 +4,8 @@
 Texture2D	g_texture : register(t0);		//テクスチャー
 SamplerState	g_sampler : register(s0);	//サンプラー
 
+Texture2D	g_toon_texture : register(t1);		//テクスチャー
+
 //───────────────────────────────────────
 // コンスタントバッファ
 // DirectX 側から送信されてくる、ポリゴン頂点以外の諸情報の定義
@@ -75,15 +77,17 @@ float4 PS(VS_OUT inData) : SV_Target
 {
 	float4 lightSource = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	const int num = 3;
-	inData.color = floor(inData.color * num) / num;
+//	const int num = 3;
+//	inData.color = floor(inData.color * num) / num;
 //	if (inData.color.x < 1 / 3.0) inData.color = float4(1.0f / num, 1.0f / num, 1.0f / num, 0);
 //	else if (inData.color.x < 2 / 3.0) inData.color = float4(2.0f / num, 2.0f / num, 2.0f / num, 0);
 //	else if (inData.color.x < 3 / 3.0) inData.color = float4(3.0f / num, 3.0f / num, 3.0f / num, 0);
-//	return inData.color;
 
 	//ポスタリゼーションの計算毎画素・フレームで計算すんのはくそ
 	//g_samplerみたいに最初に計算結果を準備しておくと、アクセスするだけで値が取れるようになる
+	float2 uvT = float2(0,0);
+	uvT = float2(inData.color.x, 0.5);
+	inData.color = g_toon_texture.Sample(g_sampler, uvT);
 
 	float4 diffuse;
 	float4 ambient;

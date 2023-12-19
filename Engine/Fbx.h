@@ -68,6 +68,8 @@ class Fbx
 	// マテリアルの初期化
 	void InitMaterial(fbxsdk::FbxNode* pNode, bool isFlatColor);
 
+	Texture* pToonTexture;
+
 public:
 	Fbx();
 	HRESULT Load(std::string fileName, bool isFlatColor);		// FBXファイルの読み込み

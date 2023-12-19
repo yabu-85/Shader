@@ -102,15 +102,6 @@ void Stage::Draw()
     Model::SetTransform(hModel_[0], blockTrans);
     Model::Draw(hModel_[0], isPointLight + 1);
 
-    //Plane‚Ì•\Ž¦
-#if 0
-    Transform groundTrans;
-    groundTrans.scale_ = XMFLOAT3(6.0f, 6.0f, 6.0f);
-    groundTrans.position_ = XMFLOAT3(0.0f, -0.8f, 0.0f);
-    Model::SetTransform(hModel[1], groundTrans);
-    Model::Draw(hModel[1], isPointLight + 1);
-#endif
-
     for (int i = 0; i < 3; i++) {
         Transform arrowTrans;
         arrowTrans.position_ = XMFLOAT3(0.0f, -0.8f, 0.0f);
