@@ -61,7 +61,7 @@ HRESULT Fbx::Load(std::string fileName, bool isFlatColor)
 	// テクスチャの読み込み
 	HRESULT hr;
 	pToonTexture = new Texture;
-	hr = pToonTexture->Load("Assets\\GureGura.png");
+	hr = pToonTexture->Load("Assets\\GureGuraPlus.png");
 	if (FAILED(hr))
 	{
 		MessageBox(NULL, "テクスチャの読み込みに失敗しました", "エラー", MB_OK);

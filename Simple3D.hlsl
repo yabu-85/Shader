@@ -77,16 +77,21 @@ float4 PS(VS_OUT inData) : SV_Target
 {
 	float4 lightSource = float4(1.0f, 1.0f, 1.0f, 1.0f);
 
+	float4 lightDir = normalize(-g_lightPosition);
+	float4 eyeDir = normalize(inData.eye);
+
 //	const int num = 3;
 //	inData.color = floor(inData.color * num) / num;
 //	if (inData.color.x < 1 / 3.0) inData.color = float4(1.0f / num, 1.0f / num, 1.0f / num, 0);
 //	else if (inData.color.x < 2 / 3.0) inData.color = float4(2.0f / num, 2.0f / num, 2.0f / num, 0);
 //	else if (inData.color.x < 3 / 3.0) inData.color = float4(3.0f / num, 3.0f / num, 3.0f / num, 0);
 
+	//輪郭だったら黒、ちがうなら白
+	float4 r = abs(dot(eyeDir, inData.normal));
+
 	//ポスタリゼーションの計算毎画素・フレームで計算すんのはくそ
 	//g_samplerみたいに最初に計算結果を準備しておくと、アクセスするだけで値が取れるようになる
-	float2 uvT = float2(0,0);
-	uvT = float2(inData.color.x, 0.5);
+	float2 uvT = float2(inData.color.x, r.x);
 	inData.color = g_toon_texture.Sample(g_sampler, uvT);
 
 	float4 diffuse;
@@ -101,9 +106,6 @@ float4 PS(VS_OUT inData) : SV_Target
 		diffuse = lightSource * g_texture.Sample(g_sampler, inData.uv) * inData.color;
 		ambient = lightSource * g_texture.Sample(g_sampler, inData.uv) * g_ambientColor;
 	}
-
-	float4 lightDir = normalize(-g_lightPosition);
-	float4 eyeDir = normalize(inData.eye);
 
 	//鏡面反射光（スペキュラー）
 #if 0
