@@ -9,7 +9,6 @@ namespace {
 
     XMFLOAT3 camPos{};
     Transform blockTrans;
-    bool isPointLight = false;
 }
 
 void Stage::InitConstantBuffer()
@@ -94,13 +93,13 @@ void Stage::Update()
 //•`‰æ
 void Stage::Draw()
 {
-    if (Input::IsKeyDown(DIK_F))
-        isPointLight = !isPointLight;
-
     blockTrans.position_ = XMFLOAT3(0.0f, 0.0f, 0.0f);
     blockTrans.rotate_.y += 1.0f;
+    if (blockTrans.rotate_.y >= 360.0f) blockTrans.rotate_.y = 0.0f;
     Model::SetTransform(hModel_[0], blockTrans);
-    Model::Draw(hModel_[0], isPointLight + 1);
+    Model::Draw(hModel_[0]);
+    OutputDebugStringA(std::to_string(blockTrans.rotate_.y).c_str());
+    OutputDebugString("\n");
 
     for (int i = 0; i < 3; i++) {
         Transform arrowTrans;
@@ -108,14 +107,14 @@ void Stage::Draw()
         arrowTrans.rotate_ = arrowRotate[i];
         arrowTrans.scale_ = XMFLOAT3(0.2f, 0.2f, 0.2f);
         Model::SetTransform(hModel_[2], arrowTrans);
-        Model::Draw(hModel_[2], isPointLight + 1);
+        Model::Draw(hModel_[2]);
     }
 
     Transform box;
     box.scale_ = XMFLOAT3(0.3f, 0.3f, 0.3f);
     box.position_ = XMFLOAT3(lightSourcePosition_.x, lightSourcePosition_.y, lightSourcePosition_.z);
     Model::SetTransform(hModel_[3], box);
-    Model::Draw(hModel_[3], isPointLight + 1);
+    Model::Draw(hModel_[3]);
     
 }
 

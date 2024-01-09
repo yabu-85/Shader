@@ -164,6 +164,7 @@
     <ClCompile Include="TheMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="OutLine.hlsl" />
     <FxCompile Include="PointLightShading.hlsl" />
     <FxCompile Include="Simple2D.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
@@ -179,6 +180,7 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
+    <FxCompile Include="Toon.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

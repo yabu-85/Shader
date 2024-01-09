@@ -124,6 +124,12 @@
     <FxCompile Include="PointLightShading.hlsl">
       <Filter>Shader</Filter>
     </FxCompile>
+    <FxCompile Include="Toon.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
+    <FxCompile Include="OutLine.hlsl">
+      <Filter>Shader</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="YoshinpeyEngin.rc">

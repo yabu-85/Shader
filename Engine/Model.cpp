@@ -39,9 +39,9 @@ void Model::SetTransform(int hModel, Transform transform)
 	//モデル番号は、modelListのインデックス
 }
 
-void Model::Draw(int hModel, int type_) {
+void Model::Draw(int hModel) {
 	//モデル番号は、modelListのインデックス
-	modelList[hModel]->pfbx_->Draw(modelList[hModel]->transform_, type_);
+	modelList[hModel]->pfbx_->Draw(modelList[hModel]->transform_);
 }
 
 void Model::Release()

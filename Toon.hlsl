@@ -4,6 +4,8 @@
 Texture2D	g_texture : register(t0);		//テクスチャー
 SamplerState	g_sampler : register(s0);	//サンプラー
 
+Texture2D	g_toon_texture : register(t1);		//テクスチャー
+
 //───────────────────────────────────────
 // コンスタントバッファ
 // DirectX 側から送信されてくる、ポリゴン頂点以外の諸情報の定義
@@ -74,9 +76,11 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
 float4 PS(VS_OUT inData) : SV_Target
 {
 	float4 lightSource = float4(1.0f, 1.0f, 1.0f, 1.0f);
-
 	float4 lightDir = normalize(-g_lightPosition);
 	float4 eyeDir = normalize(inData.eye);
+
+	float2 uvT = float2(inData.color.x, 1);
+	inData.color = g_toon_texture.Sample(g_sampler, uvT);
 
 	float4 diffuse;
 	float4 ambient;
@@ -92,16 +96,9 @@ float4 PS(VS_OUT inData) : SV_Target
 	}
 
 	//鏡面反射光（スペキュラー）
-#if 0
-	//リフレクト関数使ったやつ
-	float4 reflection = reflect(lightDir, inData.normal);
-	float4 specular = pow(saturate(dot(reflection, eyeDir)), g_shuniness) * g_specular;
-#else 
-	//正直に計算したやつ
 	float4 NL = dot(lightDir, inData.normal);
 	float4 reflection = lightDir - 2.0 * NL * inData.normal;
 	float4 specular = pow(saturate(dot(reflection, eyeDir)), g_shuniness) * g_specular;
-#endif
 
 	return (diffuse + ambient + specular);
 }

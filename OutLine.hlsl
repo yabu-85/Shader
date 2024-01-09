@@ -46,23 +46,16 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
 	//ピクセルシェーダーへ渡す情報
 	VS_OUT outData;
 
-	//ローカル座標に、ワールド・ビュー・プロジェクション行列をかけて
-	//スクリーン座標に変換し、ピクセルシェーダーへ
-	outData.pos = mul(pos, g_matWVP);
-	outData.uv = uv;
-
 	//法線を回転
 	normal.w = 0;
 	normal = mul(normal, g_matNormal);
 	normal = normalize(normal);
 	outData.normal = normal;
 
-	float4 light = normalize(g_lightPosition);
-	outData.color = saturate(dot(normal, light)); //saturateが 0～１に収めるclamp
-
-	//視線ベクトル（ハイライトの計算に必要
-	float4 worldPos = mul(pos, g_matW);					//ローカル座標にワールド行列をかけてワールド座標へ
-	outData.eye = g_eyePosition - worldPos;	//視点から頂点位置を引き算し視線を求めてピクセルシェーダーへ
+	//ローカル座標に、ワールド・ビュー・プロジェクション行列をかけて
+	//スクリーン座標に変換し、ピクセルシェーダーへ
+	pos = pos + normal * 0.1;
+	outData.pos = mul(pos, g_matWVP);
 
 	//まとめて出力
 	return outData;
@@ -73,35 +66,5 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
 //───────────────────────────────────────
 float4 PS(VS_OUT inData) : SV_Target
 {
-	float4 lightSource = float4(1.0f, 1.0f, 1.0f, 1.0f);
-
-	float4 lightDir = normalize(-g_lightPosition);
-	float4 eyeDir = normalize(inData.eye);
-
-	float4 diffuse;
-	float4 ambient;
-	if (g_isTexture == false)
-	{
-		diffuse = lightSource * g_diffuseColor * inData.color;
-		ambient = lightSource * g_diffuseColor * g_ambientColor;
-	}
-	else
-	{
-		diffuse = lightSource * g_texture.Sample(g_sampler, inData.uv) * inData.color;
-		ambient = lightSource * g_texture.Sample(g_sampler, inData.uv) * g_ambientColor;
-	}
-
-	//鏡面反射光（スペキュラー）
-#if 0
-	//リフレクト関数使ったやつ
-	float4 reflection = reflect(lightDir, inData.normal);
-	float4 specular = pow(saturate(dot(reflection, eyeDir)), g_shuniness) * g_specular;
-#else 
-	//正直に計算したやつ
-	float4 NL = dot(lightDir, inData.normal);
-	float4 reflection = lightDir - 2.0 * NL * inData.normal;
-	float4 specular = pow(saturate(dot(reflection, eyeDir)), g_shuniness) * g_specular;
-#endif
-
-	return (diffuse + ambient + specular);
+	return float4(0,0,0,0);
 }
