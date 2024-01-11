@@ -48,7 +48,7 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL)
 
 	//ñ@ê¸ÇâÒì]
 	normal.w = 0;
-	normal = mul(normal, g_matNormal);
+	normal = mul(normal, abs(g_matNormal));
 	normal = normalize(normal);
 	outData.normal = normal;
 
