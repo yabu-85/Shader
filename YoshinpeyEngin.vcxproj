@@ -164,6 +164,7 @@
     <ClCompile Include="TheMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="NormalMaping.hlsl" />
     <FxCompile Include="OutLine.hlsl" />
     <FxCompile Include="PointLightShading.hlsl" />
     <FxCompile Include="Simple2D.hlsl">

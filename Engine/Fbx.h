@@ -69,6 +69,7 @@ class Fbx
 	void InitMaterial(fbxsdk::FbxNode* pNode, bool isFlatColor);
 
 	Texture* pToonTexture;
+	Texture* pNormalTexture;
 
 public:
 	Fbx();

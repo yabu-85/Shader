@@ -7,7 +7,7 @@
 Fbx::Fbx()
 	:vertexCount_(0), polygonCount_(0), materialCount_(0),
 	pVertexBuffer_(nullptr), pIndexBuffer_(nullptr), pConstantBuffer_(nullptr),
-	pMaterialList_(nullptr), pToonTexture(nullptr)
+	pMaterialList_(nullptr), pToonTexture(nullptr), pNormalTexture(nullptr)
 {
 }
 
@@ -57,11 +57,19 @@ HRESULT Fbx::Load(std::string fileName, bool isFlatColor)
 	//マネージャ解放
 	pFbxManager->Destroy();
 	
-	pToonTexture = new Texture;
 	// テクスチャの読み込み
 	HRESULT hr;
 	pToonTexture = new Texture;
 	hr = pToonTexture->Load("Assets\\GureGuraPlus.png");
+	if (FAILED(hr))
+	{
+		MessageBox(NULL, "テクスチャの読み込みに失敗しました", "エラー", MB_OK);
+		return hr;
+	}
+
+	// テクスチャの読み込み
+	pNormalTexture = new Texture;
+	hr = pNormalTexture->Load("Assets\\brick_wall_005_nor_gl_2k.jpg");
 	if (FAILED(hr))
 	{
 		MessageBox(NULL, "テクスチャの読み込みに失敗しました", "エラー", MB_OK);
@@ -250,7 +258,7 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode, bool isFlatColor)
 
 void Fbx::Draw(Transform& transform)
 {
-	Direct3D::SetShader(SHADER_OUTLINE);
+	Direct3D::SetShader(SHADER_NORMAL);
 	transform.Calclation();//トランスフォームを計算
 
 	//コンスタントバッファに情報を渡す
@@ -297,9 +305,14 @@ void Fbx::Draw(Transform& transform)
 		ID3D11ShaderResourceView* pSRVToon = pToonTexture->GetSRV();
 		Direct3D::pContext_->PSSetShaderResources(1, 1, &pSRVToon);
 
+		ID3D11ShaderResourceView* pSRVMap = pNormalTexture->GetSRV();
+		Direct3D::pContext_->PSSetShaderResources(2, 1, &pSRVMap);
+
 		//描画
 		Direct3D::pContext_->DrawIndexed(indexCount_[i], 0, 0);
 	}
+
+	return;
 
 	Direct3D::SetShader(SHADER_TOON);
 	for (int i = 0; i < materialCount_; i++)
@@ -344,6 +357,9 @@ void Fbx::Draw(Transform& transform)
 
 		ID3D11ShaderResourceView* pSRVToon = pToonTexture->GetSRV();
 		Direct3D::pContext_->PSSetShaderResources(1, 1, &pSRVToon);
+
+		ID3D11ShaderResourceView* pSRVMap = pNormalTexture->GetSRV();
+		Direct3D::pContext_->PSSetShaderResources(2, 1, &pSRVMap);
 
 		//描画
 		Direct3D::pContext_->DrawIndexed(indexCount_[i], 0, 0);

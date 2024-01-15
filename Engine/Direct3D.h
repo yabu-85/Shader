@@ -18,7 +18,8 @@ enum SHADER_TYPE
 	SHADER_3D,		//3Dシェーダー
 	SHADER_POINT,	//ポイントシェーダー
 	SHADER_TOON,	//Toon	
-	SHADER_OUTLINE,	//OutLine	
+	SHADER_OUTLINE,	//OutLine
+	SHADER_NORMAL,	//NormalMaping
 	SHADER_MAX		//シェーダーの最大数
 };
 
@@ -38,6 +39,7 @@ namespace Direct3D
 	HRESULT InitShaderPoint();
 	HRESULT InitShaderToon();
 	HRESULT InitShaderOutLine();
+	HRESULT InitShaderNormal();
 
 	//使用するシェーダーを設定
 	void SetShader(SHADER_TYPE type);
