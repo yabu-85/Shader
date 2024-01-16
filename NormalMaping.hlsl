@@ -3,8 +3,8 @@
 //───────────────────────────────────────
 Texture2D	g_texture : register(t0);		//テクスチャー
 SamplerState	g_sampler : register(s0);	//サンプラー
-
-Texture2D	g_normal_texture : register(t2);		//テクスチャー
+Texture2D	g_normalTexture : register(t1);		//テクスチャー
+SamplerState	g_normalSampler : register(s1);	//サンプラー
 
 //───────────────────────────────────────
 // コンスタントバッファ

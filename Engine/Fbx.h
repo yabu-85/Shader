@@ -21,6 +21,7 @@ class Fbx
 	struct MATERIAL
 	{
 		Texture*	pTexture;		// テクスチャへのポインタ
+		Texture*	pNormalTexture;	// テクスチャへのポインタ
 		XMFLOAT4	diffuse;		// ディフューズカラー
 		XMFLOAT4	ambient;		// 環境光
 		XMFLOAT4	speculer;		// 鏡面反射光の色
@@ -43,7 +44,8 @@ class Fbx
 	{
 		XMVECTOR position;			// 頂点座標
 		XMVECTOR uv;				// UV座標
-		XMVECTOR normal;			// 法線ベクトル
+		XMVECTOR normal;			// 法線
+		XMVECTOR tangent;			// 接戦
 	};
 
 	int vertexCount_;				// 頂点数
@@ -69,7 +71,6 @@ class Fbx
 	void InitMaterial(fbxsdk::FbxNode* pNode, bool isFlatColor);
 
 	Texture* pToonTexture;
-	Texture* pNormalTexture;
 
 public:
 	Fbx();

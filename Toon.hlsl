@@ -4,7 +4,7 @@
 Texture2D	g_texture : register(t0);		//テクスチャー
 SamplerState	g_sampler : register(s0);	//サンプラー
 
-Texture2D	g_toon_texture : register(t1);		//テクスチャー
+Texture2D	g_toon_texture : register(t2);		//テクスチャー
 
 //───────────────────────────────────────
 // コンスタントバッファ
