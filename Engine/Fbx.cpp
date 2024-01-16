@@ -7,7 +7,7 @@
 Fbx::Fbx()
 	:vertexCount_(0), polygonCount_(0), materialCount_(0),
 	pVertexBuffer_(nullptr), pIndexBuffer_(nullptr), pConstantBuffer_(nullptr),
-	pMaterialList_(nullptr), pToonTexture(nullptr)
+	pMaterialList_(nullptr)
 {
 }
 
@@ -57,16 +57,6 @@ HRESULT Fbx::Load(std::string fileName, bool isFlatColor)
 	//マネージャ解放
 	pFbxManager->Destroy();
 	
-	// テクスチャの読み込み
-	HRESULT hr;
-	pToonTexture = new Texture;
-	hr = pToonTexture->Load("Assets\\GureGuraPlus.png");
-	if (FAILED(hr))
-	{
-		MessageBox(NULL, "テクスチャの読み込みに失敗しました", "エラー", MB_OK);
-		return hr;
-	}
-
 	return S_OK;
 }
 
@@ -81,16 +71,21 @@ void Fbx::InitVertex(fbxsdk::FbxMesh* mesh)
 	{
 		//ここでTangentの情報をとってる：面に一つの情報だからここ
 		int sIndex = mesh->GetPolygonVertexIndex(poly);
-		FbxGeometryElementTangent* tangent = mesh->GetElementTangent(0);
-		FbxVector4 vTangent = tangent->GetDirectArray().GetAt(sIndex).mData;
-
-		for (int j = 0; j < 3; j++) {
-
-			//ポリゴンのインデックスとってる
-			int index = mesh->GetPolygonVertices()[sIndex + j];
-			vertices[index].tangent = { (float)vTangent[0], (float)vTangent[1], (float)vTangent[2], (float)vTangent[3] };
+		FbxGeometryElementTangent* t = mesh->GetElementTangent(0);
+		if (t) {
+			FbxVector4 tangent = t->GetDirectArray().GetAt(sIndex).mData;
+			for (int j = 0; j < 3; j++) {
+				int index = mesh->GetPolygonVertices()[sIndex + j];
+				vertices[index].tangent = { (float)tangent[0], (float)tangent[1], (float)tangent[2], (float)tangent[3] };
+			}
 		}
-
+		else {
+			for (int j = 0; j < 3; j++) {
+				int index = mesh->GetPolygonVertices()[sIndex + j];
+				vertices[index].tangent = { 0.0f, 0.0f, 0.0f, 0.0f };
+			}
+		}
+		
 		//3頂点分
 		for (int vertex = 0; vertex < 3; vertex++)
 		{
@@ -340,65 +335,12 @@ void Fbx::Draw(Transform& transform)
 
 		if (pMaterialList_[i].pNormalTexture)
 		{
-			ID3D11SamplerState* pSampler = pMaterialList_[i].pNormalTexture->GetSampler();
-			Direct3D::pContext_->PSSetSamplers(1, 1, &pSampler);
+		//	ID3D11SamplerState* pSampler = pMaterialList_[i].pNormalTexture->GetSampler();
+		//	Direct3D::pContext_->PSSetSamplers(1, 1, &pSampler);
 
-			ID3D11ShaderResourceView* pSRV = pMaterialList_[i].pNormalTexture->GetSRV();
-			Direct3D::pContext_->PSSetShaderResources(1, 1, &pSRV);
+		//	ID3D11ShaderResourceView* pSRV = pMaterialList_[i].pNormalTexture->GetSRV();
+		//	Direct3D::pContext_->PSSetShaderResources(1, 1, &pSRV);
 		}
-
-		ID3D11ShaderResourceView* pSRVToon = pToonTexture->GetSRV();
-		Direct3D::pContext_->PSSetShaderResources(2, 1, &pSRVToon);
-
-		//描画
-		Direct3D::pContext_->DrawIndexed(indexCount_[i], 0, 0);
-	}
-
-	return;
-
-	Direct3D::SetShader(SHADER_TOON);
-	for (int i = 0; i < materialCount_; i++)
-	{
-		CONSTANT_BUFFER cb;
-		cb.matWVP = XMMatrixTranspose(transform.GetWorldMatrix() * Camera::GetViewMatrix() * Camera::GetProjectionMatrix());
-		cb.matW = XMMatrixTranspose(transform.GetWorldMatrix());
-		cb.matNormal = XMMatrixTranspose(transform.GetNormalMatrix());
-		cb.diffuseColor = pMaterialList_[i].diffuse;
-		cb.ambientColor = pMaterialList_[i].ambient;
-		cb.speculer = pMaterialList_[i].speculer;
-		cb.shininess = pMaterialList_[i].shininess;
-		cb.isTextured = pMaterialList_[i].pTexture != nullptr;
-		
-		//データ送るときエラーが出なければこっちを使ったほうがいい
-		Direct3D::pContext_->UpdateSubresource(pConstantBuffer_, 0, NULL, &cb, 0, 0);
-
-		//各情報をパイプラインにセット
-		//頂点バッファ
-		UINT stride = sizeof(VERTEX);
-		UINT offset = 0;
-		Direct3D::pContext_->IASetVertexBuffers(0, 1, &pVertexBuffer_, &stride, &offset);
-
-		// インデックスバッファー
-		stride = sizeof(int);
-		offset = 0;
-		Direct3D::pContext_->IASetIndexBuffer(pIndexBuffer_[i], DXGI_FORMAT_R32_UINT, 0);
-
-		// コンスタントバッファにこのバッファを使うように指示してる
-		// 左の番号はHlslのレジスタの番号 (b0)
-		Direct3D::pContext_->VSSetConstantBuffers(0, 1, &pConstantBuffer_);	//頂点シェーダー用	
-		Direct3D::pContext_->PSSetConstantBuffers(0, 1, &pConstantBuffer_);	//ピクセルシェーダー用
-
-		if (pMaterialList_[i].pTexture)
-		{
-			ID3D11SamplerState* pSampler = pMaterialList_[i].pTexture->GetSampler();
-			Direct3D::pContext_->PSSetSamplers(0, 1, &pSampler);
-
-			ID3D11ShaderResourceView* pSRV = pMaterialList_[i].pTexture->GetSRV();
-			Direct3D::pContext_->PSSetShaderResources(0, 1, &pSRV);
-		}
-
-		ID3D11ShaderResourceView* pSRVToon = pToonTexture->GetSRV();
-		Direct3D::pContext_->PSSetShaderResources(1, 1, &pSRVToon);
 
 		//描画
 		Direct3D::pContext_->DrawIndexed(indexCount_[i], 0, 0);
