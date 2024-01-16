@@ -234,6 +234,7 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode, bool isFlatColor)
 		}
 
 		pMaterialList_[i].pTexture = nullptr;
+		pMaterialList_[i].pNormalTexture = nullptr;
 
 		//テクスチャ情報
 		FbxProperty  lProperty = pMaterial->FindProperty(FbxSurfaceMaterial::sDiffuse);
@@ -335,11 +336,11 @@ void Fbx::Draw(Transform& transform)
 
 		if (pMaterialList_[i].pNormalTexture)
 		{
-		//	ID3D11SamplerState* pSampler = pMaterialList_[i].pNormalTexture->GetSampler();
-		//	Direct3D::pContext_->PSSetSamplers(1, 1, &pSampler);
+			ID3D11SamplerState* pSampler = pMaterialList_[i].pNormalTexture->GetSampler();
+			Direct3D::pContext_->PSSetSamplers(1, 1, &pSampler);
 
-		//	ID3D11ShaderResourceView* pSRV = pMaterialList_[i].pNormalTexture->GetSRV();
-		//	Direct3D::pContext_->PSSetShaderResources(1, 1, &pSRV);
+			ID3D11ShaderResourceView* pSRV = pMaterialList_[i].pNormalTexture->GetSRV();
+			Direct3D::pContext_->PSSetShaderResources(1, 1, &pSRV);
 		}
 
 		//描画
