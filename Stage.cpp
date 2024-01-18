@@ -45,7 +45,7 @@ Stage::~Stage()
 void Stage::Initialize()
 {
     //モデルデータのロード
-    hModel_[0] = Model::Load("Assets/BoxBrick.fbx");
+    hModel_[0] = Model::Load("Assets/torus.fbx");
     assert(hModel_[0] >= 0);
     hModel_[1] = Model::Load("Assets/ground.fbx");
     assert(hModel_[1] >= 0);

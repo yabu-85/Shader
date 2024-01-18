@@ -68,24 +68,7 @@ void Fbx::InitVertex(fbxsdk::FbxMesh* mesh)
 
 	//全ポリゴン
 	for (DWORD poly = 0; poly < polygonCount_; poly++)
-	{
-		//ここでTangentの情報をとってる：面に一つの情報だからここ
-		int sIndex = mesh->GetPolygonVertexIndex(poly);
-		FbxGeometryElementTangent* t = mesh->GetElementTangent(0);
-		if (t) {
-			FbxVector4 tangent = t->GetDirectArray().GetAt(sIndex).mData;
-			for (int j = 0; j < 3; j++) {
-				int index = mesh->GetPolygonVertices()[sIndex + j];
-				vertices[index].tangent = { (float)tangent[0], (float)tangent[1], (float)tangent[2], (float)tangent[3] };
-			}
-		}
-		else {
-			for (int j = 0; j < 3; j++) {
-				int index = mesh->GetPolygonVertices()[sIndex + j];
-				vertices[index].tangent = { 0.0f, 0.0f, 0.0f, 0.0f };
-			}
-		}
-		
+	{	
 		//3頂点分
 		for (int vertex = 0; vertex < 3; vertex++)
 		{
@@ -109,10 +92,22 @@ void Fbx::InitVertex(fbxsdk::FbxMesh* mesh)
 		}
 	}
 
-	//Tangentの情報を所得する：面ごとにだからポリゴンごとに
-	for (int i = 0; i < polygonCount_; i++) {
+	//全ポリゴンのタンジェント取得
+	FbxGeometryElementTangent* t = mesh->GetElementTangent(0);
+	for (int i = 0; i < polygonCount_; i++)
+	{
+		//ここでTangentの情報をとってる：面に一つの情報だからここ
+		FbxVector4 tangent = { 0,0,0,0 };
+		int sIndex = mesh->GetPolygonVertexIndex(i);
+		if (t) {
+			tangent = t->GetDirectArray().GetAt(sIndex).mData;
 
+		}
 
+		for (int j = 0; j < 3; j++) {
+			int index = mesh->GetPolygonVertices()[sIndex + j];
+			vertices[index].tangent = { (float)tangent[0], (float)tangent[1], (float)tangent[2], 0.0f };
+		}	
 	}
 
 	//頂点バッファ
@@ -234,7 +229,7 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode, bool isFlatColor)
 		}
 
 		pMaterialList_[i].pTexture = nullptr;
-		pMaterialList_[i].pNormalTexture = nullptr;
+		pMaterialList_[i].pNormalmap = nullptr;
 
 		//テクスチャ情報
 		FbxProperty  lProperty = pMaterial->FindProperty(FbxSurfaceMaterial::sDiffuse);
@@ -262,7 +257,7 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode, bool isFlatColor)
 		//NormalMapのやつ
 		{
 			//テクスチャ情報
-			FbxProperty  lProperty = pMaterial->FindProperty(FbxSurfaceMaterial::sNormalMap);
+			FbxProperty  lProperty = pMaterial->FindProperty(FbxSurfaceMaterial::sBump);
 
 			//テクスチャの数数
 			int fileTextureCount = lProperty.GetSrcObjectCount<FbxFileTexture>();
@@ -279,8 +274,8 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode, bool isFlatColor)
 				wsprintf(name, "%s%s", name, ext);
 
 				//ファイルからテクスチャ作成
-				pMaterialList_[i].pNormalTexture = new Texture;
-				HRESULT hr = pMaterialList_[i].pNormalTexture->Load(name);
+				pMaterialList_[i].pNormalmap = new Texture;
+				HRESULT hr = pMaterialList_[i].pNormalmap->Load(name);
 				assert(hr == S_OK);
 			}
 		}
@@ -304,7 +299,8 @@ void Fbx::Draw(Transform& transform)
 		cb.ambientColor = pMaterialList_[i].ambient;
 		cb.speculer = pMaterialList_[i].speculer;
 		cb.shininess = pMaterialList_[i].shininess;
-		cb.isTextured = pMaterialList_[i].pTexture != nullptr;
+		cb.isTexture = pMaterialList_[i].pTexture != nullptr;
+		cb.isNormalMap = pMaterialList_[i].pNormalmap != nullptr;
 
 		//データ送るときエラーが出なければこっちを使ったほうがいい
 		Direct3D::pContext_->UpdateSubresource(pConstantBuffer_, 0, NULL, &cb, 0, 0);
@@ -334,12 +330,12 @@ void Fbx::Draw(Transform& transform)
 			Direct3D::pContext_->PSSetShaderResources(0, 1, &pSRV);
 		}
 
-		if (pMaterialList_[i].pNormalTexture)
+		if (pMaterialList_[i].pNormalmap)
 		{
-			ID3D11SamplerState* pSampler = pMaterialList_[i].pNormalTexture->GetSampler();
+			ID3D11SamplerState* pSampler = pMaterialList_[i].pNormalmap->GetSampler();
 			Direct3D::pContext_->PSSetSamplers(1, 1, &pSampler);
 
-			ID3D11ShaderResourceView* pSRV = pMaterialList_[i].pNormalTexture->GetSRV();
+			ID3D11ShaderResourceView* pSRV = pMaterialList_[i].pNormalmap->GetSRV();
 			Direct3D::pContext_->PSSetShaderResources(1, 1, &pSRV);
 		}
 

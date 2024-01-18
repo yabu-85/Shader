@@ -21,7 +21,7 @@ class Fbx
 	struct MATERIAL
 	{
 		Texture*	pTexture;		// テクスチャへのポインタ
-		Texture*	pNormalTexture;	// テクスチャへのポインタ
+		Texture*	pNormalmap;		// テクスチャへのポインタ
 		XMFLOAT4	diffuse;		// ディフューズカラー
 		XMFLOAT4	ambient;		// 環境光
 		XMFLOAT4	speculer;		// 鏡面反射光の色
@@ -36,8 +36,9 @@ class Fbx
 		XMFLOAT4	diffuseColor;   // ディフューズカラー
 		XMFLOAT4	ambientColor;   // 環境光のカラー
 		XMFLOAT4	speculer;		// 反射光の色
-		float		shininess;		// 反射光の強さ
-		int			isTextured;		// テクスチャを使用するかのフラグ
+		FLOAT		shininess;		// 反射光の強さ
+		BOOL		isTexture;		// テクスチャを使用するかのフラグ
+		BOOL		isNormalMap;	// NormalMapのデータを持っているか
 	};
 
 	struct VERTEX
