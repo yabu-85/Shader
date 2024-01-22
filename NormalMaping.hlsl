@@ -5,7 +5,6 @@ Texture2D	g_texture : register(t0);		//テクスチャー
 SamplerState	g_sampler : register(s0);	//サンプラー
 
 Texture2D	g_normalTexture : register(t1);		//テクスチャー
-SamplerState	g_normalSampler : register(s1);	//サンプラー
 
 //───────────────────────────────────────
 // コンスタントバッファ
@@ -58,21 +57,11 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL, f
 	outData.pos = mul(pos, g_matWVP);
 	outData.uv = (float2)uv;
 
-	float3 no;
-	no.x = normal.x;
-	no.y = normal.y;
-	no.z = normal.z;
-
-	float3 ta;
-	ta.x = tangent.x;
-	ta.y = tangent.y;
-	ta.z = tangent.z;
-	float3 binormal = cross(no, ta);
-
 	//法線を回転
 	normal.w = 0;
 	normal = mul(normal, g_matNormal);
 	normal = normalize(normal);
+	normal.w = 0;
 	outData.normal = normal;
 
 	tangent.w = 0;
@@ -82,18 +71,27 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL, f
 	float4 posw = mul(pos, g_matW);		//ローカル座標にワールド行列をかけてワールド座標へ
 	outData.eye = g_eyePosition - posw;	//視点から頂点位置を引き算し視線を求めてピクセルシェーダーへ
 
+	float3 no = { normal.x, normal.y, normal.z };
+	float3 ta = { tangent.x, tangent.y, tangent.z };
+	float3 binormal = cross(no, ta);
+	binormal = mul(binormal, g_matNormal);
+	binormal = normalize(binormal);
+
 	outData.Neyev.x = dot(outData.eye, tangent);
 	outData.Neyev.y = dot(outData.eye, binormal);
 	outData.Neyev.z = dot(outData.eye, normal);
 	outData.Neyev.w = 0;
 
 	float4 light = normalize(g_lightPosition);
+	light.w = 0.0f;
+	light = normalize(light);
+
 	outData.color = mul(normal, light); 
-	//outData.color = saturate(dot(normal, light)); //saturateが 0～１に収めるclamp
-	
-	outData.light.x = dot(g_lightPosition, tangent); //接空間の光源ベクトル
-	outData.light.y = dot(g_lightPosition, binormal);
-	outData.light.z = dot(g_lightPosition, normal);
+	outData.color.w = 0.0f;
+
+	outData.light.x = dot(light, tangent); //接空間の光源ベクトル
+	outData.light.y = dot(light, binormal);
+	outData.light.z = dot(light, normal);
 	outData.light.w = 0;
 
 	//まとめて出力
@@ -111,45 +109,33 @@ float4 PS(VS_OUT inData) : SV_Target
 
 	if (g_isNormalmap)
 	{
-		inData.light = normalize(inData.light);
-
 		//rgbの値を-1～1の範囲で取得する
-		float4 tmpNormal = g_normalTexture.Sample(g_sampler, inData.uv) * 2 - 1;
+		float4 tmpNormal = g_normalTexture.Sample(g_sampler, inData.uv) * 2.0f - 1.0f;
 		tmpNormal.w = 0;
 		tmpNormal = normalize(tmpNormal);
 
-		float4 S = dot(tmpNormal, normalize(inData.light));
-		S = clamp(S, 0, 1);
-		
-		float4 lightDir = normalize(-inData.light);
-		float4 R = reflect(lightDir, tmpNormal);
-		R = lightDir - 2.0 * S * tmpNormal;
+		float4 reflection = reflect(-inData.light, tmpNormal);
+		float4 specular = pow(saturate(dot(reflection, normalize(inData.Neyev))), g_shuniness) * g_specular;
 
-		float4 specular = pow(saturate(dot(R, inData.Neyev)), g_shuniness) * g_specular;
-
-		//float4 lightDir = normalize(-g_lightPosition);
-		//float4 NL = dot(lightDir, inData.normal);
-		//float4 reflection = lightDir - 2.0 * NL * inData.normal;
-		//float4 specular = pow(saturate(dot(reflection, normalize(inData.eye))), g_shuniness) * g_specular;
-
+		float4 NL = clamp(dot(tmpNormal, inData.light), 0, 1);
 		if (g_isTexture == true)
 		{
-			diffuse = g_texture.Sample(g_sampler, inData.uv) * S;
+			diffuse = g_texture.Sample(g_sampler, inData.uv) * NL;
 			ambient = g_texture.Sample(g_sampler, inData.uv) * g_ambientColor;
 		}
 		else
 		{
-			diffuse = g_diffuseColor * S;
+			diffuse = g_diffuseColor * NL;
 			ambient = g_diffuseColor * g_ambientColor;
 		}
 
-		return  diffuse + ambient + specular;
+		return specular;
+
 	}
 	else
 	{
-		//float4 NL = saturate(dot(inData.normal, normalize(lightPosition)));
-		//float4 reflection = reflect(normalize(-lightPosition), inData.normal);
-		//float4 specular = pow(saturate(dot(reflection, normalize(inData.eyev))), shininess) * specularColor;
+		float4 reflection = reflect(normalize(-g_lightPosition), inData.normal);
+		float4 specular = pow(saturate(dot(reflection, normalize(inData.eye))), g_shuniness) * g_specular;
 		
 		if (g_isTexture == true)
 		{
@@ -161,12 +147,7 @@ float4 PS(VS_OUT inData) : SV_Target
 			diffuse = lightSource * g_diffuseColor * inData.color;
 			ambient = lightSource * g_diffuseColor * g_ambientColor;
 		}
-
-		float4 lightDir = normalize(-g_lightPosition);
-		float4 NL = dot(lightDir, inData.normal);
-		float4 reflection = lightDir - 2.0 * NL * inData.normal;
-		float4 specular = pow(saturate(dot(reflection, normalize(inData.eye))), g_shuniness) * g_specular;
-
+		
 		return (diffuse + ambient + specular);
 
 	}
