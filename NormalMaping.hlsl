@@ -129,7 +129,8 @@ float4 PS(VS_OUT inData) : SV_Target
 			ambient = g_diffuseColor * g_ambientColor;
 		}
 
-		return specular;
+		float4 result = diffuse + ambient + specular;
+		return result;
 
 	}
 	else
@@ -148,7 +149,9 @@ float4 PS(VS_OUT inData) : SV_Target
 			ambient = lightSource * g_diffuseColor * g_ambientColor;
 		}
 		
-		return (diffuse + ambient + specular);
+		float4 result = diffuse + ambient + specular;
+		if (g_isTexture) result.a = inData.uv.x;
+		return result;
 
 	}
 }

@@ -2,6 +2,7 @@
 #include "Stage.h"
 #include "Engine/Camera.h"
 #include "Engine/Input.h"
+#include "Engine/Direct3D.h"
 
 namespace {
     const XMFLOAT4 DEF_LIGHT_POSITION = { 0.0f, 0.0f, 0.0f, 0.0f };
