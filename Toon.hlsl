@@ -77,9 +77,8 @@ float4 PS(VS_OUT inData) : SV_Target
 {
 	float4 lightSource = float4(1.0f, 1.0f, 1.0f, 1.0f);
 	float4 lightDir = normalize(-g_lightPosition);
-	float4 eyeDir = normalize(inData.eye);
 
-	float2 uvT = float2(inData.color.x, 1);
+	float2 uvT = float2(inData.color.x, 1.0f);
 	inData.color = g_toon_texture.Sample(g_sampler, uvT);
 
 	float4 diffuse;
@@ -98,7 +97,7 @@ float4 PS(VS_OUT inData) : SV_Target
 	//鏡面反射光（スペキュラー）
 	float4 NL = dot(lightDir, inData.normal);
 	float4 reflection = lightDir - 2.0 * NL * inData.normal;
-	float4 specular = pow(saturate(dot(reflection, eyeDir)), g_shuniness) * g_specular;
+	float4 specular = pow(saturate(dot(reflection, normalize(inData.eye))), g_shuniness) * g_specular;
 
 	return (diffuse + ambient + specular);
 }

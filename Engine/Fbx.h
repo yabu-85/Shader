@@ -21,7 +21,6 @@ class Fbx
 	struct MATERIAL
 	{
 		Texture*	pTexture;		// テクスチャへのポインタ
-		Texture*	pNormalTexture;	// テクスチャへのポインタ
 		XMFLOAT4	diffuse;		// ディフューズカラー
 		XMFLOAT4	ambient;		// 環境光
 		XMFLOAT4	speculer;		// 鏡面反射光の色
