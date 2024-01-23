@@ -91,17 +91,9 @@ float4 PS(VS_OUT inData) : SV_Target
 		ambient = lightSource * g_texture.Sample(g_sampler, inData.uv) * g_ambientColor;
 	}
 
-	//鏡面反射光（スペキュラー）
-#if 0
-	//リフレクト関数使ったやつ
-	float4 reflection = reflect(lightDir, inData.normal);
-	float4 specular = pow(saturate(dot(reflection, eyeDir)), g_shuniness) * g_specular;
-#else 
-	//正直に計算したやつ
 	float4 NL = dot(lightDir, inData.normal);
 	float4 reflection = lightDir - 2.0 * NL * inData.normal;
 	float4 specular = pow(saturate(dot(reflection, eyeDir)), g_shuniness) * g_specular;
-#endif
 
 	return (diffuse + ambient + specular);
 }
