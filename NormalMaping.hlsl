@@ -61,15 +61,15 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL, f
 	normal.w = 0;
 	normal = mul(normal, g_matNormal);
 	normal = normalize(normal);
-	normal.w = 0;
 	outData.normal = normal;
 
 	tangent.w = 0;
 	tangent = mul(tangent, g_matNormal);
 	tangent = normalize(tangent);	//接線ベクトルをローカル座標に変換したやつ
 
-	float4 posw = mul(pos, g_matW);		//ローカル座標にワールド行列をかけてワールド座標へ
-	outData.eye = g_eyePosition - posw;	//視点から頂点位置を引き算し視線を求めてピクセルシェーダーへ
+	float4 posw = mul(pos, g_matW);			//ローカル座標にワールド行列をかけてワールド座標へ
+	outData.eye = g_eyePosition - posw;		//視点から頂点位置を引き算し視線を求めてピクセルシェーダーへ
+	outData.eye = normalize(outData.eye);
 
 	float3 no = { normal.x, normal.y, normal.z };
 	float3 ta = { tangent.x, tangent.y, tangent.z };
