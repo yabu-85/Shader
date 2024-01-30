@@ -46,7 +46,7 @@ Stage::~Stage()
 void Stage::Initialize()
 {
     //モデルデータのロード
-    hModel_[0] = Model::Load("Assets/Ball.fbx");
+    hModel_[0] = Model::Load("Assets/dice.fbx");
     assert(hModel_[0] >= 0);
     hModel_[1] = Model::Load("Assets/ground.fbx");
     assert(hModel_[1] >= 0);
@@ -94,11 +94,6 @@ void Stage::Update()
 //描画
 void Stage::Draw()
 {
-    blockTrans.position_ = XMFLOAT3(0.0f, 0.0f, 0.0f);
-    blockTrans.rotate_.y += 1.0f;
-    if (blockTrans.rotate_.y >= 360.0f) blockTrans.rotate_.y = 0.0f;
-    Model::SetTransform(hModel_[0], blockTrans);
-    Model::Draw(hModel_[0]);
     OutputDebugStringA(std::to_string(blockTrans.rotate_.y).c_str());
     OutputDebugString("\n");
 
@@ -116,7 +111,13 @@ void Stage::Draw()
     box.position_ = XMFLOAT3(lightSourcePosition_.x, lightSourcePosition_.y, lightSourcePosition_.z);
     Model::SetTransform(hModel_[3], box);
     Model::Draw(hModel_[3]);
-    
+ 
+    blockTrans.position_ = XMFLOAT3(0.0f, 0.0f, 0.0f);
+    blockTrans.rotate_.y += 1.0f;
+    if (blockTrans.rotate_.y >= 360.0f) blockTrans.rotate_.y = 0.0f;
+    Model::SetTransform(hModel_[0], blockTrans);
+    Model::Draw(hModel_[0]);
+
 }
 
 //開放

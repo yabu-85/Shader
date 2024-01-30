@@ -92,6 +92,19 @@ void Fbx::InitVertex(fbxsdk::FbxMesh* mesh)
 		}
 	}
 
+	///////////////////////////頂点のＵＶ/////////////////////////////////////
+	int m_dwNumUV = mesh->GetTextureUVCount();
+	FbxLayerElementUV* pUV = mesh->GetLayer(0)->GetUVs();
+	if (m_dwNumUV > 0 && pUV->GetMappingMode() == FbxLayerElement::eByControlPoint)
+	{
+		for (int k = 0; k < m_dwNumUV; k++)
+		{
+			FbxVector2 uv = pUV->GetDirectArray().GetAt(k);
+			vertices[k].uv = XMVectorSet((float)uv.mData[0], (float)(1.0f - uv.mData[1]), 0.0f, 0.0f);
+		}
+	}
+
+
 	//全ポリゴンのタンジェント取得
 	FbxGeometryElementTangent* t = mesh->GetElementTangent(0);
 	for (int i = 0; i < polygonCount_; i++)
@@ -285,7 +298,7 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode, bool isFlatColor)
 
 void Fbx::Draw(Transform& transform)
 {
-	Direct3D::SetShader(SHADER_NORMAL);
+	Direct3D::SetShader(SHADER_3D);
 	transform.Calclation();//トランスフォームを計算
 
 	//コンスタントバッファに情報を渡す

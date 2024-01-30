@@ -150,7 +150,6 @@ float4 PS(VS_OUT inData) : SV_Target
 		}
 		
 		float4 result = diffuse + ambient + specular;
-		if (g_isTexture) result.a = inData.uv.x;
 		return result;
 
 	}
