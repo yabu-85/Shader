@@ -5,7 +5,7 @@
 #include "Engine/Direct3D.h"
 
 namespace {
-    const XMFLOAT4 DEF_LIGHT_POSITION = { 0.0f, 0.0f, 0.0f, 0.0f };
+    const XMFLOAT4 DEF_LIGHT_POSITION = { 0.0f, 3.0f, -5.0f, 0.0f };
     const XMFLOAT3 arrowRotate[3] = { XMFLOAT3(90.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 90.0f) };
 
     XMFLOAT3 camPos{};
@@ -46,9 +46,9 @@ Stage::~Stage()
 void Stage::Initialize()
 {
     //モデルデータのロード
-    hModel_[0] = Model::Load("Assets/dice.fbx");
+    hModel_[0] = Model::Load("Assets/torus.fbx");
     assert(hModel_[0] >= 0);
-    hModel_[1] = Model::Load("Assets/ground.fbx");
+    hModel_[1] = Model::Load("Assets/Water2.fbx");
     assert(hModel_[1] >= 0);
     hModel_[2] = Model::Load("Assets/arrow.fbx");
     assert(hModel_[2] >= 0);
@@ -56,6 +56,7 @@ void Stage::Initialize()
     assert(hModel_[3] >= 0); 
 
     camPos = XMFLOAT3(0.0f, 3.0f, 5.0f);
+    Camera::SetPosition(camPos);
     Camera::SetTarget(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
     InitConstantBuffer();
@@ -111,12 +112,19 @@ void Stage::Draw()
     box.position_ = XMFLOAT3(lightSourcePosition_.x, lightSourcePosition_.y, lightSourcePosition_.z);
     Model::SetTransform(hModel_[3], box);
     Model::Draw(hModel_[3]);
- 
+
+    Transform water;
+    water.position_ = XMFLOAT3(0.0f, -3.0f, 0.0f);
+    Model::SetTransform(hModel_[1], water);
+    Model::Draw(hModel_[1]);
+
     blockTrans.position_ = XMFLOAT3(0.0f, 0.0f, 0.0f);
     blockTrans.rotate_.y += 1.0f;
     if (blockTrans.rotate_.y >= 360.0f) blockTrans.rotate_.y = 0.0f;
     Model::SetTransform(hModel_[0], blockTrans);
     Model::Draw(hModel_[0]);
+
+
 
 }
 

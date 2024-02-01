@@ -292,13 +292,12 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode, bool isFlatColor)
 				assert(hr == S_OK);
 			}
 		}
-
 	}
 }
 
 void Fbx::Draw(Transform& transform)
 {
-	Direct3D::SetShader(SHADER_3D);
+	Direct3D::SetShader(SHADER_NORMAL);
 	transform.Calclation();//トランスフォームを計算
 
 	//コンスタントバッファに情報を渡す

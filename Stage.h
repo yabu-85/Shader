@@ -12,7 +12,7 @@ class Stage : public GameObject
     ID3D11Buffer* pCBStageScene_;		// コンスタントバッファへのポインタ
     void InitConstantBuffer();
 
-    int hModel_[4];
+    int hModel_[5];
     XMFLOAT4 lightSourcePosition_;
 
 public:
