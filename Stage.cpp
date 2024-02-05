@@ -48,7 +48,7 @@ void Stage::Initialize()
     //モデルデータのロード
     hModel_[0] = Model::Load("Assets/torus.fbx");
     assert(hModel_[0] >= 0);
-    hModel_[1] = Model::Load("Assets/Water2.fbx");
+    hModel_[1] = Model::Load("Assets/Water.fbx");
     assert(hModel_[1] >= 0);
     hModel_[2] = Model::Load("Assets/arrow.fbx");
     assert(hModel_[2] >= 0);
@@ -115,6 +115,7 @@ void Stage::Draw()
 
     Transform water;
     water.position_ = XMFLOAT3(0.0f, -3.0f, 0.0f);
+    water.scale_ = XMFLOAT3(5.0f, 1.0f, 5.0f);
     Model::SetTransform(hModel_[1], water);
     Model::Draw(hModel_[1]);
 
