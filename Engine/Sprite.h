@@ -17,6 +17,7 @@ private:
 	struct CONSTANT_BUFFER
 	{
 		XMMATRIX	matNormal;		//ワールド行列
+		float scroll;
 	};
 
 	//頂点情報
@@ -62,6 +63,9 @@ public:
 	void Draw(Transform& transform);	
 
 	//解放
-	void Release();						
+	void Release();					
+
+	float scrollValue;
+
 };
 

@@ -2,7 +2,7 @@
 
 Sprite::Sprite()
     : pVertexBuffer_(nullptr), pIndexBuffer_(nullptr), pConstantBuffer_(nullptr), pTexture_(nullptr),
-    vertexNum_(0), indexNum_(0)
+    vertexNum_(0), indexNum_(0), scrollValue(0)
 {
 }
 
@@ -49,11 +49,14 @@ HRESULT Sprite::Initialize(string fileName)
 //描画
 void Sprite::Draw(Transform& transform)
 {
+    scrollValue += 0.001f;
+
     Direct3D::SetShader(SHADER_2D);
     transform.Calclation();
     PassDataToCB(transform);
     SetBufferToPipeline();
     Direct3D::pContext_->DrawIndexed((UINT)indexNum_, (UINT)0, (UINT)0);
+
 }
 
 //開放処理
@@ -193,6 +196,7 @@ void Sprite::PassDataToCB(Transform transform)
     // コンスタントバッファに渡す情報
     CONSTANT_BUFFER cb{};
     cb.matNormal = XMMatrixTranspose(transform.GetNormalMatrix());
+    cb.scroll = scrollValue;
 
     // コンスタントバッファの更新
     D3D11_MAPPED_SUBRESOURCE mappedResource;
