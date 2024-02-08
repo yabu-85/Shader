@@ -4,7 +4,7 @@
 Texture2D	g_texture : register(t0);		//テクスチャー
 SamplerState	g_sampler : register(s0);	//サンプラー
 
-Texture2D	g_normalTexture : register(t1);		//テクスチャー
+Texture2D	g_normalTexture : register(t1);	//テクスチャー
 
 //───────────────────────────────────────
 // コンスタントバッファ
@@ -63,9 +63,9 @@ VS_OUT VS(float4 pos : POSITION, float4 uv : TEXCOORD, float4 normal : NORMAL, f
 	normal = normalize(normal);
 	outData.normal = normal;
 
-	tangent.w = 0;
 	tangent = mul(tangent, g_matNormal);
 	tangent = normalize(tangent);	//接線ベクトルをローカル座標に変換したやつ
+	tangent.w = 0;
 
 	float4 posw = mul(pos, g_matW);			//ローカル座標にワールド行列をかけてワールド座標へ
 	outData.eye = g_eyePosition - posw;		//視点から頂点位置を引き算し視線を求めてピクセルシェーダーへ
@@ -111,13 +111,13 @@ float4 PS(VS_OUT inData) : SV_Target
 	{
 		//rgbの値を-1～1の範囲で取得する
 		float4 tmpNormal = g_normalTexture.Sample(g_sampler, inData.uv) * 2.0f - 1.0f;
-		tmpNormal.w = 0;
 		tmpNormal = normalize(tmpNormal);
+		tmpNormal.w = 0;
 
-		float4 reflection = reflect(-inData.light, tmpNormal);
+		float4 reflection = reflect(normalize(inData.light), tmpNormal);
 		float4 specular = pow(saturate(dot(reflection, normalize(inData.Neyev))), g_shuniness) * g_specular;
+		float4 NL = clamp(dot(normalize(inData.light), tmpNormal), 0, 1);
 
-		float4 NL = clamp(dot(tmpNormal, inData.light), 0, 1);
 		if (g_isTexture == true)
 		{
 			diffuse = g_texture.Sample(g_sampler, inData.uv) * NL;

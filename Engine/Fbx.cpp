@@ -297,7 +297,7 @@ void Fbx::InitMaterial(fbxsdk::FbxNode* pNode, bool isFlatColor)
 
 void Fbx::Draw(Transform& transform)
 {
-	Direct3D::SetShader(SHADER_2D);
+	Direct3D::SetShader(SHADER_NORMAL);
 	transform.Calclation();//トランスフォームを計算
 
 	//コンスタントバッファに情報を渡す
@@ -344,9 +344,6 @@ void Fbx::Draw(Transform& transform)
 
 		if (pMaterialList_[i].pNormalmap)
 		{
-			ID3D11SamplerState* pSampler = pMaterialList_[i].pNormalmap->GetSampler();
-			Direct3D::pContext_->PSSetSamplers(1, 1, &pSampler);
-
 			ID3D11ShaderResourceView* pSRV = pMaterialList_[i].pNormalmap->GetSRV();
 			Direct3D::pContext_->PSSetShaderResources(1, 1, &pSRV);
 		}
