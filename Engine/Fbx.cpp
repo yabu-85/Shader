@@ -300,6 +300,8 @@ void Fbx::Draw(Transform& transform)
 	Direct3D::SetShader(SHADER_NORMAL);
 	transform.Calclation();//トランスフォームを計算
 
+	scroll_+= 0.001f;
+
 	//コンスタントバッファに情報を渡す
 	for (int i = 0; i < materialCount_; i++)
 	{
@@ -313,6 +315,7 @@ void Fbx::Draw(Transform& transform)
 		cb.shininess = pMaterialList_[i].shininess;
 		cb.isTexture = pMaterialList_[i].pTexture != nullptr;
 		cb.isNormalMap = pMaterialList_[i].pNormalmap != nullptr;
+		cb.scroll = scroll_;
 
 		//データ送るときエラーが出なければこっちを使ったほうがいい
 		Direct3D::pContext_->UpdateSubresource(pConstantBuffer_, 0, NULL, &cb, 0, 0);

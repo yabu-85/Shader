@@ -39,7 +39,10 @@ class Fbx
 		FLOAT		shininess;		// 反射光の強さ
 		BOOL		isTexture;		// テクスチャを使用するかのフラグ
 		BOOL		isNormalMap;	// NormalMapのデータを持っているか
+		float		scroll;
 	};
+
+	float scroll_;
 
 	struct VERTEX
 	{

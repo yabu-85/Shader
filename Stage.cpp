@@ -7,6 +7,7 @@
 namespace {
     const XMFLOAT4 DEF_LIGHT_POSITION = { 0.0f, 3.0f, -5.0f, 0.0f };
     const XMFLOAT3 arrowRotate[3] = { XMFLOAT3(90.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 90.0f) };
+    const XMFLOAT3 DEF_CAMERA_POSITION = XMFLOAT3(0.0f, 3.0f, 10.0f);
 
     XMFLOAT3 camPos{};
     Transform blockTrans;
@@ -55,8 +56,8 @@ void Stage::Initialize()
     hModel_[3] = Model::Load("Assets/BoxBrick.fbx");
     assert(hModel_[3] >= 0); 
 
-    camPos = XMFLOAT3(0.0f, 3.0f, 5.0f);
-    Camera::SetPosition(camPos);
+    camPos = XMFLOAT3(DEF_CAMERA_POSITION);
+    Camera::SetPosition(DEF_CAMERA_POSITION);
     Camera::SetTarget(XMFLOAT3(0.0f, 0.0f, 0.0f));
 
     InitConstantBuffer();
@@ -95,9 +96,6 @@ void Stage::Update()
 //•`‰æ
 void Stage::Draw()
 {
-    OutputDebugStringA(std::to_string(blockTrans.rotate_.y).c_str());
-    OutputDebugString("\n");
-
     for (int i = 0; i < 3; i++) {
         Transform arrowTrans;
         arrowTrans.position_ = XMFLOAT3(0.0f, -0.8f, 0.0f);
@@ -113,19 +111,17 @@ void Stage::Draw()
     Model::SetTransform(hModel_[3], box);
     Model::Draw(hModel_[3]);
 
-    Transform water;
-    water.position_ = XMFLOAT3(0.0f, -3.0f, 0.0f);
-    water.scale_ = XMFLOAT3(5.0f, 1.0f, 5.0f);
-    Model::SetTransform(hModel_[1], water);
-    Model::Draw(hModel_[1]);
-
     blockTrans.position_ = XMFLOAT3(0.0f, 0.0f, 0.0f);
     blockTrans.rotate_.y += 1.0f;
     if (blockTrans.rotate_.y >= 360.0f) blockTrans.rotate_.y = 0.0f;
     Model::SetTransform(hModel_[0], blockTrans);
     Model::Draw(hModel_[0]);
 
-
+    Transform water;
+    water.position_ = XMFLOAT3(0.0f, -3.0f, 0.0f);
+    water.scale_ = XMFLOAT3(5.0f, 1.0f, 5.0f);
+    Model::SetTransform(hModel_[1], water);
+    Model::Draw(hModel_[1]);
 
 }
 

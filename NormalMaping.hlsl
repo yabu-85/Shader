@@ -21,6 +21,8 @@ cbuffer global : register(b0)
 	float		g_shuniness;		// 鏡面反射光の強さ
 	bool		g_isTexture;		// テクスチャ貼ってあるかどうか
 	bool		g_isNormalmap;		// 
+    float		g_scroll;
+	
 };
 
 cbuffer light : register(b1)
@@ -106,14 +108,15 @@ float4 PS(VS_OUT inData) : SV_Target
 	float4 lightSource = float4(1.0f, 1.0f, 1.0f, 1.0f);
 	float4 diffuse;
 	float4 ambient;
-
+	
 	if (g_isNormalmap)
 	{
-		//rgbの値を-1～1の範囲で取得する
-		float4 tmpNormal = g_normalTexture.Sample(g_sampler, inData.uv) * 2.0f - 1.0f;
-		tmpNormal = normalize(tmpNormal);
-		tmpNormal.w = 0;
-
+        //rgbの値を-1～1の範囲で取得する
+		float2 tmpNormalUV = float2(inData.uv.x + g_scroll, inData.uv.y + g_scroll);
+        float4 tmpNormal = g_normalTexture.Sample(g_sampler, tmpNormalUV) * 2.0f - 1.0f;
+        tmpNormal = normalize(tmpNormal);
+        tmpNormal.w = 0;
+        
 		float4 reflection = reflect(normalize(inData.light), tmpNormal);
 		float4 specular = pow(saturate(dot(reflection, normalize(inData.Neyev))), g_shuniness) * g_specular;
 		float4 NL = clamp(dot(normalize(inData.light), tmpNormal), 0, 1);
@@ -130,7 +133,8 @@ float4 PS(VS_OUT inData) : SV_Target
 		}
 
 		float4 result = diffuse + ambient + specular;
-		return result;
+        result.a = (result.r + result.g + result.b) / 3.0f + 0.6f;
+        return result;
 
 	}
 	else
